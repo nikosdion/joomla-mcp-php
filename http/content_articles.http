@@ -1,0 +1,44 @@
+### List articles
+# Filters:
+# - filter[author]      int
+# - filter[category]    int
+# - filter[state]       int
+# - filter[featured]    int
+# - filter[tag]         int
+# - filter[language]    string
+# - filter[search]      string
+# - list[ordering]      string
+# - list[direction]     string
+GET {{baseUrl}}/api/index.php/v1/content/articles
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get article data
+GET {{baseUrl}}/api/index.php/v1/content/articles/4
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create article
+POST {{baseUrl}}/api/index.php/v1/content/articles
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Narf",
+	"alias": "narf",
+	"articletext": "<p>This is the introtext</p><hr id=\"system-readmore\"><p>This is the fulltext</p>",
+	"catid": 2,
+	"language": "*",
+	"state": 1,
+    "images": {
+		"image_intro": "images/sampledata/cassiopeia/nasa1-640.jpg",
+        "image_intro_alt": ""
+    }
+}
+
+### Delete article
+DELETE {{baseUrl}}/api/index.php/v1/content/articles/5
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
