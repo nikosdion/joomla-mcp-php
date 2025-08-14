@@ -56,6 +56,19 @@ You can add the following **optional** arguments to the `args` array:
 * `--debug` to enable debug mode.
 * `--log=/path/to/your/log_file.log` to specify the path to your log file.
 
+### Using with small context window models
+
+> [!IMPORTANT]
+> If you are using LM Studio you **MUST** set the **Context Overflow** to a "Rolling Window" instead of "Truncate Middle". Failure to do so will result in the LLM going into an infinite loop calling the same MCP tool over and over.
+
+The MCP server provides a lot of tools. The JSON schema for these tools is quite large. As a result, LLMs that use a small context window (e.g. 1024 tokens) will not be able to use all of the tools provided by this MCP server or might fail outright as their context window is overrun. A solution to that is to choose which MCP tools to expose to the LLM. This depends on the LLM and user interface you are using.
+
+Furthermore, Joomla produces fairly large JSON responses, which can easily overrun the context window of the LLM. This is especially true if you are asking the LLM to work on large datasets, like dozens or hundreds of articles.
+
+If you are using LM Studio I strongly advise you to set the **Context Overflow** option (right hand menu, Model tab, Settings, click on All to expose it) to **Rolling Window** instead of the default "Truncate Middle". Moreover, you should only choose the MCP tools you need to use for your request (again, right hand menu, Program tab, click on the Tools of your MCP definition and uncheck the ones you don't need).
+
+A future version of this MCP server will provide a way to select which MCP tools to expose to the LLM.
+
 ## Provided MCP tools
 
 For a full list of provided MCP tools, and the up-to-date roadmap please refer to the [`http/README.md`](http/README.md) file.
@@ -71,6 +84,7 @@ By default, MCP4Joomla logs only information messages (e.g. which tool was calle
 
 ## Roadmap
 
+- Implement an option to select which MCP tools to expose to the LLM.
 - Implement a `--non-destructive` switch which turns off destructive commands (anything that can modify or delete data, change configuration, install / update extensions and the core, etc.).
 - Implement support for all `webservices` plugins provided by Joomla in Joomla 5.4 and 6.0.
 - Implement support for extensibility by scanning a `user_code` directory, and documenting how MCP element classes can be created. Perhaps include a demo MCP element class.
