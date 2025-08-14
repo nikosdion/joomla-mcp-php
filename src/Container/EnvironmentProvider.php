@@ -34,7 +34,7 @@ class EnvironmentProvider implements ServiceProviderInterface
 				throw new \RuntimeException('BEARER_TOKEN must be a valid base64-encoded string');
 			}
 			
-			$env['JOOMLA_TOKEN'] = $_SERVER['BEARER_TOKEN'];
+			$env['BEARER_TOKEN'] = $_SERVER['BEARER_TOKEN'];
 			
 			return $env;
 		};

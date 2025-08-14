@@ -1,4 +1,9 @@
 ### List articles
+GET {{baseUrl}}/api/index.php/v1/content/articles
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List articles, with filters
 # Filters:
 # - filter[author]      int
 # - filter[category]    int
@@ -9,11 +14,6 @@
 # - filter[search]      string
 # - list[ordering]      string
 # - list[direction]     string
-GET {{baseUrl}}/api/index.php/v1/content/articles
-Authorization: Bearer {{token}}
-Accept: application/vnd.api+json
-
-###
 GET {{baseUrl}}/api/index.php/v1/content/articles?filter[state]=1
 Authorization: Bearer {{token}}
 Accept: application/vnd.api+json
@@ -40,6 +40,16 @@ Content-Type: application/json
 		"image_intro": "images/sampledata/cassiopeia/nasa1-640.jpg",
         "image_intro_alt": ""
     }
+}
+
+### Update article
+PATCH {{baseUrl}}/api/index.php/v1/content/articles/6
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"state": 1
 }
 
 ### Delete article

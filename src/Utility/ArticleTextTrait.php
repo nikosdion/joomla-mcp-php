@@ -21,7 +21,7 @@ trait ArticleTextTrait
 	 * @return  string The combined article content, with a delimiter if both parts are present.
 	 * @throws  CommonMarkException
 	 */
-	private function getArticleText(string $introText, string $fullText): string
+	private function getArticleText(?string $introText, ?string $fullText): string
 	{
 		$introText = trim($introText ?? '');
 		$fullText  = trim($fullText ?? '');

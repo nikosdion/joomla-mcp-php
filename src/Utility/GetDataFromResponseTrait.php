@@ -77,10 +77,9 @@ trait GetDataFromResponseTrait
 				);
 			}
 
-			return $parsedBody->data;
+			return $parsedBody;
 		}
-
-		if (is_array($parsedBody->data))
+		elseif (is_array($parsedBody->data))
 		{
 			foreach ($parsedBody->data as $item)
 			{
@@ -103,7 +102,7 @@ trait GetDataFromResponseTrait
 				}
 			}
 
-			return $parsedBody->data;
+			return $parsedBody;
 		}
 
 		throw new \RuntimeException('Failed to process Joomla API response (invalid data structure): ' . $body);

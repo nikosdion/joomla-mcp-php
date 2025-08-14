@@ -10,6 +10,8 @@ namespace Dionysopoulos\Mcp4Joomla\Utility;
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
 use Joomla\Http\Http;
 use Joomla\Http\Response;
+use Joomla\Uri\Uri;
+use Pimple\Psr11\Container;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -27,10 +29,12 @@ final class HttpDecorator implements ClientInterface
 	public function __construct(
 		private readonly Http $http,
 		private readonly bool $logRequests = true,
-		private readonly bool $logResponses = true
+		private readonly bool $logResponses = true,
+		private ?Container $container = null,
 	)
 	{
-		$this->logger = Factory::getContainer()->get('log');
+		$this->container ??= Factory::getContainer();
+		$this->logger = $this->container->get('log');
 	}
 
 	/**
@@ -70,6 +74,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function options(string $url, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('OPTIONS', $url, $headers);
 
 		$response = $this->http->options($url, $headers, $timeout);
@@ -90,6 +96,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function head(string $url, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('HEAD', $url, $headers);
 
 		$response = $this->http->head($url, $headers, $timeout);
@@ -112,6 +120,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function get(string $url, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('GET', $url, $headers);
 
 		$response = $this->http->get($url, $headers, $timeout);
@@ -133,6 +143,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function post(string $url, mixed $data, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('POST', $url, $headers, $data);
 
 		$response = $this->http->post($url, $data, $headers, $timeout);
@@ -154,6 +166,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function put(string $url, mixed $data, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('PUT', $url, $headers, $data);
 
 		$response = $this->http->put($url, $data, $headers, $timeout);
@@ -176,6 +190,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function delete(string $url, array $headers = [], ?int $timeout = null, mixed $data = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('DELETE', $url, $headers, $data);
 
 		$response = $this->http->delete($url, $headers, $timeout, $data);
@@ -197,6 +213,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function trace(string $url, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('TRACE', $url, $headers);
 
 		$response = $this->http->trace($url, $headers, $timeout);
@@ -218,6 +236,8 @@ final class HttpDecorator implements ClientInterface
 	 */
 	public function patch(string $url, mixed $data, array $headers = [], ?int $timeout = null): Response
 	{
+		$headers = array_merge($this->getDefaultHeaders(), $headers);
+
 		$this->logRequestData('PATCH', $url, $headers, $data);
 
 		$response = $this->http->patch($url, $data, $headers, $timeout);
@@ -225,6 +245,45 @@ final class HttpDecorator implements ClientInterface
 		$this->logResponse($response);
 
 		return $response;
+	}
+
+	/**
+	 * Returns an endpoint URI with the provided path appended.
+	 *
+	 * @param   string  $path  The relative API path WITHOUT leading and trailing slashes, WITH leading `/v1`.
+	 *
+	 * @return  Uri
+	 * @throws  \Psr\Container\ContainerExceptionInterface
+	 * @throws  \Psr\Container\NotFoundExceptionInterface
+	 */
+	public function getUri(string $path): Uri
+	{
+		/** @var array $env */
+		$env = $this->container->get('env');
+
+		return new Uri(rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/' . trim($path, '/'));
+	}
+
+	/**
+	 * Get the default headers which apply to the request.
+	 *
+	 * @return array
+	 * @throws \Psr\Container\ContainerExceptionInterface
+	 * @throws \Psr\Container\NotFoundExceptionInterface
+	 */
+	public function getDefaultHeaders(): array
+	{
+		/** @var array $env */
+		$env = $this->container->get('env');
+
+		return [
+			// This is necessary for Joomla to process the request.
+			'Accept'         => 'application/vnd.api+json',
+			// This works on most servers
+			'Authorization'  => sprintf("Bearer %s", $env['BEARER_TOKEN'] ?? 'invalid'),
+			// This works on servers which don't have the PHP fix for auth headers in their config.
+			'X-Joomla-Token' => $env['BEARER_TOKEN'] ?? 'invalid',
+		];
 	}
 
 	/** @inheritDoc */
@@ -265,6 +324,11 @@ final class HttpDecorator implements ClientInterface
 
 			foreach ($headers as $k => $v)
 			{
+				if (is_array($v) && count($v) === 1)
+				{
+					$v = array_shift($v);
+				}
+
 				$this->logger->debug(sprintf('    %s: %s', $k, $this->varToLog($v)));
 			}
 		}
@@ -350,10 +414,15 @@ final class HttpDecorator implements ClientInterface
 
 		foreach ($headers as $k => $v)
 		{
+			if (is_array($v) && count($v) === 1)
+			{
+				$v = array_shift($v);
+			}
+
 			$this->logger->debug(sprintf('    %s: %s', $k, $this->varToLog($v)));
 		}
 
-		$body = $response->getBody()?->getContents() ?: null;
+		$body = $response->body ?: null;
 
 		if (empty($body))
 		{
