@@ -13,6 +13,11 @@ GET {{baseUrl}}/api/index.php/v1/content/articles
 Authorization: Bearer {{token}}
 Accept: application/vnd.api+json
 
+###
+GET {{baseUrl}}/api/index.php/v1/content/articles?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
 ### Get article data
 GET {{baseUrl}}/api/index.php/v1/content/articles/4
 Authorization: Bearer {{token}}

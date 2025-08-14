@@ -8,6 +8,7 @@
 namespace Dionysopoulos\Mcp4Joomla\Container;
 
 use Composer\CaBundle\CaBundle;
+use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
 use Joomla\Http\HttpFactory;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -16,7 +17,10 @@ class HttpProvider implements ServiceProviderInterface
 {
 	public function register(Container $pimple)
 	{
-		$pimple['http'] = fn(Container $c) => (new HttpFactory())
+		$pimple['http'] = // This is necessary for Joomla to process the request.
+			// This works on most servers
+			// This works on servers which don't have the PHP fix for auth headers in their config.
+		fn(Container $c) => new HttpDecorator((new HttpFactory())
 			->getHttp(
 				[
 					'curl.certpath'   => CaBundle::getBundledCaBundlePath(),
@@ -26,13 +30,13 @@ class HttpProvider implements ServiceProviderInterface
 					'userAgent'       => sprintf('Mcp4Joomla/%s', MCP4JOOMLA_VERSION),
 					'headers'         => [
 						// This is necessary for Joomla to process the request.
-						'Accept'   => 'application/vnd.api+json',
+						'Accept'         => 'application/vnd.api+json',
 						// This works on most servers
-						'Authorization'  => sprintf("Bearer %s", $_ENV['BEARER_TOKEN'] ?? 'invalid'),
+						'Authorization'  => sprintf("Bearer %s", $c['env']['BEARER_TOKEN'] ?? 'invalid'),
 						// This works on servers which don't have the PHP fix for auth headers in their config.
-						'X-Joomla-Token' => $_ENV['JOOMLA_TOKEN'] ?? 'invalid',
+						'X-Joomla-Token' => $c['env']['BEARER_TOKEN'] ?? 'invalid',
 					],
 				]
-			);
+			));
 	}
 }

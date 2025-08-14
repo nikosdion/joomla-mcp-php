@@ -1,11 +1,11 @@
 <?php
 /**
- * @package       joomla-mcp-php
+ * @package   joomla-mcp-php
  * @copyright (c) 2025 Nicholas K. Dionysopoulos
- * @license       AGPL-3.0-or-later
+ * @license   AGPL-3.0-or-later
  */
 
-namespace Dionysopoulos\Mcp4Joomla\Container;
+namespace Dionysopoulos\Mcp4Joomla\Utility;
 
 use Joomla\Http\Response;
 

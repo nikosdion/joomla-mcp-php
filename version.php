@@ -5,4 +5,4 @@
  * @license   AGPL-3.0-or-later
  */
 
-define('MCP4JOOMLA_VERSION', '0.0.1');
+define('MCP4JOOMLA_VERSION', '0.0.1-dev');

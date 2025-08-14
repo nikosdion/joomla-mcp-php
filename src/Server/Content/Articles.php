@@ -8,10 +8,12 @@
 namespace Dionysopoulos\Mcp4Joomla\Server\Content;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
-use Dionysopoulos\Mcp4Joomla\Container\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\ArticleTextTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\TitleToAliasTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use Joomla\Http\Http;
 use Joomla\Uri\Uri;
 use PhpMcp\Schema\ToolAnnotations;
@@ -21,8 +23,8 @@ use PhpMcp\Server\Attributes\Schema;
 /**
  * MCP elements for Joomla! articles managements
  *
- * @link ../../../http/content_articles.http
  * @see  ../../../http/README.md for details
+ * @link ../../../http/content_articles.http
  */
 class Articles
 {
@@ -30,6 +32,8 @@ class Articles
 	use TitleToAliasTrait;
 	use HandleJoomlaAPIErrorTrait;
 	use GetDataFromResponseTrait;
+	use VarToLogTrait;
+	use AutoLoggingTrait;
 
 	#[McpTool(
 		name: 'content_articles_create',
@@ -149,6 +153,8 @@ class Articles
 		?array $tags = null
 	): ?object
 	{
+		$this->autologMCPTool();
+
 		$postData = [
 			'title'            => $title,
 			'alias'            => $alias ?: $this->titleToAlias($title),
@@ -217,7 +223,8 @@ class Articles
 		}
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
-		$uri      = rtrim($_ENV['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/articles';
+		$env      = Factory::getContainer()->get('env');
+		$uri      = rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/content/articles';
 		/** @var Http $http */
 		$http = Factory::getContainer()->get('http');
 
@@ -350,6 +357,8 @@ class Articles
 		?array $tags = null
 	): ?object
 	{
+		$this->autologMCPTool();
+
 		$postData = [
 			'title'            => $title,
 			'alias'            => $alias ?: $this->titleToAlias($title),
@@ -418,7 +427,8 @@ class Articles
 		}
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
-		$uri      = rtrim($_ENV['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/articles/' . $articleId;
+		$env      = Factory::getContainer()->get('env');
+		$uri      = rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/content/articles/' . $articleId;
 		/** @var Http $http */
 		$http = Factory::getContainer()->get('http');
 
@@ -446,13 +456,13 @@ class Articles
 			2,
 			-2,
 		])]
-		?bool $filterState = null,
+		?int $filterState = null,
 		#[Schema(description: 'The featured state of the returned articles: 0=not featured, 1=featured, null=both featured and not featured', enum: [
 			null,
 			0,
 			1,
 		])]
-		?bool $filterFeatured = null,
+		?int $filterFeatured = null,
 		#[Schema(description: 'An array of tag IDs the returned articles must be assigned. NULL to return articles regardless of their tags.', items: ['type' => 'integer'], minItems: 0, uniqueItems: true)]
 		?array $filterTag = null,
 		#[Schema(description: 'The language code of the returned articles, "*" for articles explicitly assigned to "all languages", or NULL for articles assigned to any language', pattern: '^(\*|[a-z]{2}(-[A-Z]{2})?)$')]
@@ -461,7 +471,10 @@ class Articles
 		?string $filterSearch = null
 	): ?array
 	{
-		$uri = new Uri(rtrim($_ENV['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/articles');
+		$this->autologMCPTool();
+
+		$env = Factory::getContainer()->get('env');
+		$uri = new Uri(rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/content/articles');
 
 		if ($filterAuthor !== null)
 		{
@@ -520,9 +533,12 @@ class Articles
 		int $id
 	): ?object
 	{
+		$this->autologMCPTool();
+
 		/** @var Http $http */
 		$http     = Factory::getContainer()->get('http');
-		$url      = rtrim($_ENV['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/articles/' . $id;
+		$env      = Factory::getContainer()->get('env');
+		$url      = rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/content/articles/' . $id;
 		$response = $http->get($url);
 
 		$this->handlePossibleJoomlaAPIError($response);
@@ -537,9 +553,12 @@ class Articles
 	)]
 	public function deleteArticle(int $id): bool
 	{
+		$this->autologMCPTool();
+
 		/** @var Http $http */
 		$http     = Factory::getContainer()->get('http');
-		$url      = rtrim($_ENV['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/articles/' . $id;
+		$env      = Factory::getContainer()->get('env');
+		$url      = rtrim($env['JOOMLA_BASE_URL'], '/') . '/api/index.php/v1/content/articles/' . $id;
 		$response = $http->delete($url);
 
 		$this->handlePossibleJoomlaAPIError($response);

@@ -58,8 +58,22 @@ else
 // Start the MCP server.
 try
 {
+	// Get the container.
+	$container = Factory::getContainer();
+
+	/** @var \Monolog\Logger $log */
+	$log = $container->get('log');
+	$log->info('Starting MCP4Joomla server');
+
 	// Load the environment variables.
-	Factory::getContainer()->get('env')->safeLoad();
+	$env = $container->get('env');
+
+	$log->debug('Environment variables loaded:');
+
+	foreach ($env as $key => $value)
+	{
+		$log->debug("  $key = $value");
+	}
 
 	$server = Server::make()
 			->withServerInfo('MCP4Joomla Server', MCP4JOOMLA_VERSION)

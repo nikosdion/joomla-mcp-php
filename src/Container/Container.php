@@ -16,5 +16,9 @@ class Container extends PimpleContainer
 		parent::__construct($values);
 
 		$this->register(new EnvironmentProvider());
+		$this->register(new OptionsParserProvider());
+		$this->register(new InputProvider());
+		$this->register(new LogProvider());
+		$this->register(new HttpProvider());
 	}
 }

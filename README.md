@@ -33,7 +33,8 @@ Edit your MCP configuration file and add this MCP server (the object you see und
 			"command": "/usr/bin/php",
 			"args": [
 				"-f",
-				"/path/to/joomla-mcp-php/mcp4joomla.php"
+				"/path/to/joomla-mcp-php/mcp4joomla.php",
+                "server"
 			],
 			"env": {
 				"JOOMLA_BASE_URL": "https://www.example.com",
@@ -50,6 +51,10 @@ Where:
 * `/path/to/joomla-mcp-php/mcp4joomla.php` is the path to the `mcp4joomla.php` file.
 * `https://www.example.com` is the base URL of your Joomla installation, _without_ the trailing `/api`, _without_ the trailing `/index.php`.
 * `your_joomla_api_token` is the Joomla API token for any active Super User account of your Joomla installation, something that looks like `c2hhMjU2OjI5NDoxNmI5NzU3NWY1YTFhYTBmYWViNjUyMTRlZThmYzc1NTBiYWNkNmM4MjQ5N2ExYzllM2FjY2I5ODYxZjMxOGMx`.
+
+You can add the following **optional** arguments to the `args` array:
+* `--debug` to enable debug mode.
+* `--log=/path/to/your/log_file.log` to specify the path to your log file.
 
 ## Provided MCP tools
 

@@ -28,8 +28,9 @@ composer.phar
 # Editor-based Rest Client
 .idea/httpRequests
 
-### Build
+### Temporary files
 /release
+/log
 
 ### Secrets
 /http/http-client.private.env.json
