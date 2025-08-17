@@ -13,19 +13,15 @@ use League\CommonMark\Exception\CommonMarkException;
 trait ArticleTextTrait
 {
 	/**
-	 * Converts and combines the introductory text and full text into a single article content.
+	 * Converts the provided plain text into HTML format using the CommonMarkConverter.
 	 *
-	 * @param   string  $introText  The introductory text of the article.
-	 * @param   string  $fullText   The full text of the article.
+	 * @param   string|null  $text  The input text to be converted into HTML.
 	 *
-	 * @return  string The combined article content, with a delimiter if both parts are present.
-	 * @throws  CommonMarkException
+	 * @return  string  The converted HTML string, or an empty string if the input text is empty.
+	 * @throws CommonMarkException
 	 */
-	private function getArticleText(?string $introText, ?string $fullText): string
+	private function toHtml(?string $text = null): string
 	{
-		$introText = trim($introText ?? '');
-		$fullText  = trim($fullText ?? '');
-
 		$converter = new CommonMarkConverter(
 			[
 				'html_input'         => 'allow',
@@ -33,10 +29,6 @@ trait ArticleTextTrait
 			]
 		);
 
-		$introText = empty($introText) ? '' : $converter->convert($introText)->getContent();
-		$fullText  = empty($fullText) ? '' : $converter->convert($fullText)->getContent();
-
-		return $fullText ? ($introText . '<hr id="system-readmore">' . $fullText) : $introText;
+		return empty($text) ? '' : $converter->convert($text)->getContent();
 	}
-
 }

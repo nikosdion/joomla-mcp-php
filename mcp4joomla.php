@@ -87,6 +87,7 @@ try
 	$transport = new StdioServerTransport();
 	$server->listen($transport);
 
+	$log->info('Stopping MCP4Joomla server');
 }
 catch (\Throwable $e)
 {

@@ -17,7 +17,6 @@ use Dionysopoulos\Mcp4Joomla\Utility\TitleToAliasTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
-use PhpMcp\Server\Attributes\Schema;
 
 /**
  * MCP elements for Joomla! articles managements
@@ -186,7 +185,8 @@ class Articles
 			'tags'             => $tags,
 			'featured_up'      => $featuredStartTime,
 			'featured_down'    => $featuredEndTime,
-			'text'             => $this->getArticleText($introText, $fullText),
+			'introtext'        => $this->toHtml($introText),
+			'fulltext'         => $this->toHtml($fullText),
 		];
 
 		$postData['images']   = array_filter($postData['images'], fn($v) => $v !== null);
@@ -375,7 +375,8 @@ class Articles
 			'tags'             => $tags,
 			'featured_up'      => $featuredStartTime,
 			'featured_down'    => $featuredEndTime,
-			'text'             => $this->getArticleText($introText, $fullText) ?: null,
+			'introtext'        => $this->toHtml($introText),
+			'fulltext'         => $this->toHtml($fullText),
 		];
 
 		$postData['images']   = array_filter($postData['images'], fn($v) => $v !== null);

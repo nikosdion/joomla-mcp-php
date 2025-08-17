@@ -32,7 +32,6 @@ Edit your MCP configuration file and add this MCP server (the object you see und
 		"MCP4Joomla": {
 			"command": "/usr/bin/php",
 			"args": [
-				"-f",
 				"/path/to/joomla-mcp-php/mcp4joomla.php",
                 "server"
 			],
