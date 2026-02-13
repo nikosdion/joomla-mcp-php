@@ -9,6 +9,7 @@ composer.phar
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/laravel-idea.xml
 
 # Generated files
 .idea/**/contentModel.xml
