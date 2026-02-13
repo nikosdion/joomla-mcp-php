@@ -40,3 +40,7 @@ composer.phar
 
 ### PHPUnit
 /.phpunit.cache
+
+### User code
+/user_code/*
+!/user_code/HelloWorld.php

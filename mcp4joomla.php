@@ -58,6 +58,40 @@ else
 	define('MCP4JOOMLA_VERSION', '0.0.0-dev');
 }
 
+/**
+ * Recursively loads all PHP files from a directory so their classes become available for discovery.
+ *
+ * @param   string  $userCodeDir  Absolute path to the user code directory.
+ *
+ * @return  void
+ */
+function loadUserCodeFiles(string $userCodeDir): void
+{
+	$iterator = new RecursiveIteratorIterator(
+		new RecursiveDirectoryIterator($userCodeDir, RecursiveDirectoryIterator::SKIP_DOTS)
+	);
+
+	foreach ($iterator as $file)
+	{
+		if ($file->getExtension() !== 'php')
+		{
+			continue;
+		}
+
+		try
+		{
+			require_once $file->getPathname();
+		}
+		catch (\Throwable $e)
+		{
+			fwrite(STDERR, "[WARNING] Failed to load user code file {$file->getPathname()}: {$e->getMessage()}\n");
+		}
+	}
+}
+
+// Resolve the user_code directory path.
+$userCodeDir = \Phar::running() !== '' ? getcwd() . '/user_code' : __DIR__ . '/user_code';
+
 // Handle list-tools command early, before touching the DI container (which validates env vars).
 if (isset($argv[1]) && $argv[1] === 'list-tools')
 {
@@ -93,6 +127,35 @@ if (isset($argv[1]) && $argv[1] === 'list-tools')
 		foreach ($toolNames as $name)
 		{
 			echo "  $name\n";
+		}
+	}
+
+	// Discover user code tools.
+	if (is_dir($userCodeDir))
+	{
+		loadUserCodeFiles($userCodeDir);
+
+		$server = Server::make()
+			->withServerInfo('MCP4Joomla', MCP4JOOMLA_VERSION)
+			->build();
+
+		$server->discover(
+			basePath: $userCodeDir,
+			scanDirs: ['.']
+		);
+
+		$tools     = $server->getRegistry()->getTools();
+		$toolNames = array_keys($tools);
+		sort($toolNames);
+
+		if (!empty($toolNames))
+		{
+			echo "UserCode\n";
+
+			foreach ($toolNames as $name)
+			{
+				echo "  $name\n";
+			}
 		}
 	}
 
@@ -211,6 +274,27 @@ try
 		scanDirs: $scanDirs,
 		discoverer: $discoverer
 	);
+
+	// Discover user code tools.
+	if (is_dir($userCodeDir))
+	{
+		loadUserCodeFiles($userCodeDir);
+
+		$docBlockParser   = $docBlockParser ?? new DocBlockParser($log);
+		$userSchemaGen    = $input->noSchema
+			? new MinimalSchemaGenerator($docBlockParser)
+			: null;
+		$userDiscoverer   = new Discoverer(
+			$server->getRegistry(),
+			$log,
+			$docBlockParser,
+			$userSchemaGen
+		);
+
+		$userDiscoverer->discover($userCodeDir, ['.']);
+
+		$log->info('User code discovery complete.');
+	}
 
 	// If --tools is set, filter the Registry to only include the specified tools.
 	$toolsParam = $input->tools;

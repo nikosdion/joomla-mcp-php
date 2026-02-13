@@ -154,6 +154,149 @@ When running from the PHAR, logs are written to `log/debug-DATE.log` in your **c
 
 On first run, the PHAR extracts its contents to a temporary directory under `sys_get_temp_dir()` (e.g. `/tmp/mcp4joomla-<hash>`). Subsequent runs reuse the cached extraction as long as the PHAR file hasn't changed. To force a fresh extraction, delete the cached directory.
 
+## Using with Docker
+
+You can run MCP4Joomla in a Docker container without installing PHP or Composer locally.
+
+### Building the image
+
+```bash
+docker build -t mcp4joomla .
+```
+
+### MCP configuration with Docker
+
+```json
+{
+	"mcpServers": {
+		"MCP4Joomla": {
+			"command": "docker",
+			"args": [
+				"run", "-i", "--rm",
+				"-e", "JOOMLA_BASE_URL=https://www.example.com",
+				"-e", "BEARER_TOKEN=your_joomla_api_token",
+				"mcp4joomla",
+				"server"
+			]
+		}
+	}
+}
+```
+
+The `-i` flag is required for stdio transport. `--rm` removes the container when it exits.
+
+All command line options (`--debug`, `--categories`, `--non-destructive`, etc.) can be appended after `server`:
+
+```json
+"args": ["run", "-i", "--rm", "-e", "JOOMLA_BASE_URL=...", "-e", "BEARER_TOKEN=...", "mcp4joomla", "server", "--categories=Content,Tags", "--debug"]
+```
+
+### Listing tools
+
+The `list-tools` command does not require environment variables:
+
+```bash
+docker run --rm mcp4joomla list-tools
+```
+
+### Persisting logs
+
+By default, logs are written inside the container and lost when it exits. To persist them, mount a volume:
+
+```json
+"args": ["run", "-i", "--rm", "-v", "/path/to/logs:/app/log", "-e", "JOOMLA_BASE_URL=...", "-e", "BEARER_TOKEN=...", "mcp4joomla", "server"]
+```
+
+To disable logging entirely, pass `--log=/dev/null`.
+
+## Extending with custom tools
+
+You can add your own MCP tools by placing PHP files in the `user_code/` directory. Any class with `#[McpTool]` attributes will be auto-discovered alongside the built-in tools — no Composer changes or registration needed.
+
+### Creating a custom tool
+
+1. Create a PHP file in the `user_code/` directory (subdirectories are supported).
+2. Add `declare(strict_types=1)` and any `use` statements you need.
+3. Create a class with one or more public methods annotated with `#[McpTool]`.
+4. Access the DI container via `Factory::getContainer()` for services like `http`, `log`, `env`, and `input`.
+5. Optionally use the utility traits (`AutoLoggingTrait`, `HandleJoomlaAPIErrorTrait`, etc.).
+
+### Example tool
+
+```php
+<?php
+declare(strict_types=1);
+
+use Dionysopoulos\Mcp4Joomla\Container\Factory;
+use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
+use PhpMcp\Schema\ToolAnnotations;
+use PhpMcp\Server\Attributes\McpTool;
+
+class MyCustomTool
+{
+    use AutoLoggingTrait;
+
+    #[McpTool(
+        name: 'my_custom_tool',
+        description: 'Does something useful',
+        annotations: new ToolAnnotations(
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+        ),
+    )]
+    public function doSomething(string $param = 'default'): string
+    {
+        $this->autologMCPTool();
+
+        $log = Factory::getContainer()->get('log');
+        $log->debug("My custom tool called with: {$param}");
+
+        return "Result: {$param}";
+    }
+}
+```
+
+### Available DI container services
+
+| Service | Type | Description |
+|---------|------|-------------|
+| `http` | `HttpDecorator` | Joomla HTTP client with automatic auth headers. Use `$http->getUri('v1/...')` for API URLs. |
+| `log` | `LoggerInterface` | Monolog logger for debug/info/error messages. |
+| `env` | `array` | Environment variables (`JOOMLA_BASE_URL`, `BEARER_TOKEN`). |
+| `input` | `OptResult` | Parsed CLI input (command line options). |
+
+### Available utility traits
+
+| Trait | Description |
+|-------|-------------|
+| `AutoLoggingTrait` | Call `$this->autologMCPTool()` to automatically log tool invocations with arguments. |
+| `HandleJoomlaAPIErrorTrait` | Parse Joomla API error responses and throw exceptions. |
+| `GetDataFromResponseTrait` | Extract and validate JSON:API response data. |
+| `ArticleTextTrait` | Convert Markdown to HTML via CommonMark. |
+| `TitleToAliasTrait` | Generate URL-safe slugs from titles. |
+
+> [!NOTE]
+> The `#[Schema]` attributes on tool method parameters are commented out in the source (removed at runtime due to compatibility), but are kept as documentation. Your user code tools can use them the same way.
+
+### User code filtering
+
+User code tools are always discovered regardless of `--categories` and `--no-panopticon`, but they **are** subject to `--tools`, `--non-destructive`, and `--no-schema` filtering.
+
+The `list-tools` command shows user code tools under a "UserCode" heading.
+
+### Docker usage
+
+Mount your `user_code/` directory into the container:
+
+```json
+"args": ["run", "-i", "--rm", "-v", "/path/to/user_code:/app/user_code", "-e", "JOOMLA_BASE_URL=...", "-e", "BEARER_TOKEN=...", "mcp4joomla", "server"]
+```
+
+### PHAR usage
+
+Place the `user_code/` directory in the same directory where you run the PHAR file (i.e. your current working directory).
+
 ## Provided MCP tools
 
 For a full list of provided MCP tools, and the up-to-date roadmap please refer to the [`http/README.md`](http/README.md) file.
@@ -166,11 +309,6 @@ By default, MCP4Joomla logs only information messages (e.g. which tool was calle
 
 > [!IMPORTANT]  
 > Issues cannot be responded to without a log file with the debug mode enabled. You must replace your Joomla! API token in the log file with a placeholder value before submitting an issue.
-
-## Roadmap
-
-- Implement support for extensibility by scanning a `user_code` directory, and documenting how MCP element classes can be created. Perhaps include a demo MCP element class.
-- Create a Docker image to make deployment easier.
 
 ## Security and safety
 
