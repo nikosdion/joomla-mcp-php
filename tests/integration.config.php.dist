@@ -1,0 +1,19 @@
+<?php
+/**
+ * Integration test configuration template.
+ *
+ * Copy this file to integration.config.php and fill in the values.
+ * The integration.config.php file is gitignored and must NOT be committed.
+ *
+ * @package   joomla-mcp-php
+ * @copyright (c) 2025 Nicholas K. Dionysopoulos
+ * @license   AGPL-3.0-or-later
+ */
+
+return [
+	// Base URL of the Joomla site (no trailing /api or /index.php)
+	'JOOMLA_BASE_URL' => 'https://example.com',
+
+	// Base64-encoded Joomla Super User API token
+	'BEARER_TOKEN' => 'your-base64-encoded-token-here',
+];

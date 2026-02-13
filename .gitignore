@@ -35,3 +35,7 @@ composer.phar
 
 ### Secrets
 /http/http-client.private.env.json
+/tests/integration.config.php
+
+### PHPUnit
+/.phpunit.cache
