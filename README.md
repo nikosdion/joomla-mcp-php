@@ -2,10 +2,6 @@
 
 An MCP server for Joomla 5 and later, written in PHP.
 
-🚧 WORK IN PROGRESS 🚧
-
-THIS PROJECT IS STILL IN DEVELOPMENT AND IS NOT READY FOR PRODUCTION USE.
-
 ## What is this?
 
 An [MCP (Model Context Protocol)](https://en.wikipedia.org/wiki/Model_Context_Protocol) server allows a large language model (LLM, also known as “AI”) to interact with external software.
@@ -51,22 +47,70 @@ Where:
 * `https://www.example.com` is the base URL of your Joomla installation, _without_ the trailing `/api`, _without_ the trailing `/index.php`.
 * `your_joomla_api_token` is the Joomla API token for any active Super User account of your Joomla installation, something that looks like `c2hhMjU2OjI5NDoxNmI5NzU3NWY1YTFhYTBmYWViNjUyMTRlZThmYzc1NTBiYWNkNmM4MjQ5N2ExYzllM2FjY2I5ODYxZjMxOGMx`.
 
-You can add the following **optional** arguments to the `args` array:
-* `--debug` to enable debug mode.
-* `--log=/path/to/your/log_file.log` to specify the path to your log file.
+### Command line options
+
+The `server` command accepts the following optional arguments:
+
+| Option | Description |
+|--------|-------------|
+| `--debug` / `-d` | Enable debug mode (verbose logging of all parameters and API requests/responses). |
+| `--log=PATH` / `-l PATH` | Specify a custom log file path. |
+| `--no-panopticon` | Exclude all Panopticon tools. Use this if your Joomla site does not have the Panopticon Connector component installed. |
+| `--no-schema` | Strip `#[Schema]` descriptions and constraints from tool input schemas, keeping only parameter types and defaults. Reduces context size for LLMs with limited context windows. |
+| `--categories=LIST` / `-c LIST` | Comma-separated list of category names to include (case-insensitive). Only tools from these categories will be exposed. |
+| `--tools=LIST` / `-t LIST` | Comma-separated list of tool names to include. Only these exact tools will be exposed. |
+| `--non-destructive` / `-r` | Only expose read-only tools (no create, update, or delete). |
+
+**Precedence:** `--non-destructive` is applied last, after all other filters. `--tools` overrides `--categories`, which overrides `--no-panopticon`. If `--tools` is given, only those exact tools are exposed. If `--categories` is given, only tools from those categories are discovered. `--no-panopticon` excludes the Panopticon category from discovery.
+
+For example, to start the server with only the Content and Tags categories and debug logging:
+
+```json
+{
+	"mcpServers": {
+		"MCP4Joomla": {
+			"command": "/usr/bin/php",
+			"args": [
+				"/path/to/joomla-mcp-php/mcp4joomla.php",
+				"server",
+				"--categories=Content,Tags",
+				"--debug"
+			],
+			"env": {
+				"JOOMLA_BASE_URL": "https://www.example.com",
+				"BEARER_TOKEN": "your_joomla_api_token"
+			}
+		}
+	}
+}
+```
+
+### Listing available tools
+
+To see all available tool categories and their tools, run:
+
+```bash
+php mcp4joomla.php list-tools
+```
+
+This command does not require the `JOOMLA_BASE_URL` or `BEARER_TOKEN` environment variables. It prints each category name followed by its tools, indented with two spaces.
 
 ### Using with small context window models
 
 > [!IMPORTANT]
 > If you are using LM Studio you **MUST** set the **Context Overflow** to a "Rolling Window" instead of "Truncate Middle". Failure to do so will result in the LLM going into an infinite loop calling the same MCP tool over and over.
 
-The MCP server provides a lot of tools. The JSON schema for these tools is quite large. As a result, LLMs that use a small context window (e.g. 1024 tokens) will not be able to use all of the tools provided by this MCP server or might fail outright as their context window is overrun. A solution to that is to choose which MCP tools to expose to the LLM. This depends on the LLM and user interface you are using.
+The MCP server provides 212 tools across 21 categories. The JSON schema for these tools is quite large. LLMs with small context windows may not be able to use all tools, or may fail as their context is overrun. You can reduce context usage in several ways:
+
+* **`--categories`** — Only expose the categories you need (e.g. `--categories=Content,Tags`).
+* **`--tools`** — Only expose specific tools by name (e.g. `--tools=content_articles_list,tags_list`).
+* **`--no-panopticon`** — Exclude all Panopticon tools if your site doesn't use the Panopticon Connector.
+* **`--non-destructive`** — Only expose read-only tools, preventing any data modification. Useful as a safety measure.
+* **`--no-schema`** — Strip parameter descriptions and constraints from the tool schemas, significantly reducing context size.
 
 Furthermore, Joomla produces fairly large JSON responses, which can easily overrun the context window of the LLM. This is especially true if you are asking the LLM to work on large datasets, like dozens or hundreds of articles.
 
 If you are using LM Studio I strongly advise you to set the **Context Overflow** option (right hand menu, Model tab, Settings, click on All to expose it) to **Rolling Window** instead of the default "Truncate Middle". Moreover, you should only choose the MCP tools you need to use for your request (again, right hand menu, Program tab, click on the Tools of your MCP definition and uncheck the ones you don't need).
-
-A future version of this MCP server will provide a way to select which MCP tools to expose to the LLM.
 
 ## Provided MCP tools
 
@@ -83,12 +127,8 @@ By default, MCP4Joomla logs only information messages (e.g. which tool was calle
 
 ## Roadmap
 
-- Implement an option to select which MCP tools to expose to the LLM.
-- Implement a `--non-destructive` switch which turns off destructive commands (anything that can modify or delete data, change configuration, install / update extensions and the core, etc.).
-- Implement support for all `webservices` plugins provided by Joomla in Joomla 5.4 and 6.0.
 - Implement support for extensibility by scanning a `user_code` directory, and documenting how MCP element classes can be created. Perhaps include a demo MCP element class.
 - Create a PHAR archive to package the MCP server and all its dependencies for easier deployment.
-- Create a Docker image to make deployment easier.
 
 ## Security and safety
 

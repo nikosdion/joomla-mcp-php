@@ -237,6 +237,24 @@ try
 		$log->info("Tool filter applied: {$removedCount} tools removed, " . count($filtered) . " tools remaining.");
 	}
 
+	// If --non-destructive is set, keep only tools with readOnlyHint === true.
+	if ($input->nonDestructive)
+	{
+		$registry = $server->getRegistry();
+		$ref      = new \ReflectionClass($registry);
+		$prop     = $ref->getProperty('tools');
+		$prop->setAccessible(true);
+		$tools    = $prop->getValue($registry);
+		$filtered = array_filter(
+			$tools,
+			fn($registeredTool) => $registeredTool->schema->annotations?->readOnlyHint === true
+		);
+		$prop->setValue($registry, $filtered);
+
+		$removedCount = count($tools) - count($filtered);
+		$log->info("Non-destructive filter applied: {$removedCount} tools removed, " . count($filtered) . " read-only tools remaining.");
+	}
+
 	$transport = new StdioServerTransport();
 	$server->listen($transport);
 

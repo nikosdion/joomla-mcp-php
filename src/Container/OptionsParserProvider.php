@@ -28,10 +28,11 @@ class OptionsParserProvider implements ServiceProviderInterface
 				->addFlag(['no-panopticon'], 'Exclude all Panopticon tools.')
 				->addFlag(['no-schema'], 'Strip Schema descriptions/constraints from tool input schemas.')
 				->addParam(['categories', 'c'], 'STRING', 'Comma-separated category names to include.')
-				->addParam(['tools', 't'], 'STRING', 'Comma-separated tool names to include.');
+				->addParam(['tools', 't'], 'STRING', 'Comma-separated tool names to include.')
+				->addFlag(['non-destructive', 'r'], 'Only expose read-only tools (no create, update, or delete).');
 
 			$optParser
-				->addUsage('server', ['debug', 'log', 'no-panopticon', 'no-schema', 'categories', 'tools'])
+				->addUsage('server', ['debug', 'log', 'no-panopticon', 'no-schema', 'categories', 'tools', 'non-destructive'])
 				->addUsage('list-tools', []);
 
 			return $optParser;
