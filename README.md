@@ -112,6 +112,48 @@ Furthermore, Joomla produces fairly large JSON responses, which can easily overr
 
 If you are using LM Studio I strongly advise you to set the **Context Overflow** option (right hand menu, Model tab, Settings, click on All to expose it) to **Rolling Window** instead of the default "Truncate Middle". Moreover, you should only choose the MCP tools you need to use for your request (again, right hand menu, Program tab, click on the Tools of your MCP definition and uncheck the ones you don't need).
 
+## Using the PHAR archive
+
+Instead of cloning the repository, you can use a pre-built PHAR archive for easier deployment.
+
+### Building the PHAR
+
+```bash
+composer compile
+```
+
+This creates `build/mcp4joomla.phar`, a self-extracting PHAR archive (~4–8 MB).
+
+### MCP configuration with the PHAR
+
+```json
+{
+	"mcpServers": {
+		"MCP4Joomla": {
+			"command": "/usr/bin/php",
+			"args": [
+				"/path/to/mcp4joomla.phar",
+				"server"
+			],
+			"env": {
+				"JOOMLA_BASE_URL": "https://www.example.com",
+				"BEARER_TOKEN": "your_joomla_api_token"
+			}
+		}
+	}
+}
+```
+
+All command line options (`--debug`, `--categories`, `--non-destructive`, etc.) work the same as with the source installation.
+
+### Log file location
+
+When running from the PHAR, logs are written to `log/debug-DATE.log` in your **current working directory** (instead of relative to the project source). You can override this with `--log=/path/to/file.log`.
+
+### Extraction cache
+
+On first run, the PHAR extracts its contents to a temporary directory under `sys_get_temp_dir()` (e.g. `/tmp/mcp4joomla-<hash>`). Subsequent runs reuse the cached extraction as long as the PHAR file hasn't changed. To force a fresh extraction, delete the cached directory.
+
 ## Provided MCP tools
 
 For a full list of provided MCP tools, and the up-to-date roadmap please refer to the [`http/README.md`](http/README.md) file.
@@ -128,7 +170,7 @@ By default, MCP4Joomla logs only information messages (e.g. which tool was calle
 ## Roadmap
 
 - Implement support for extensibility by scanning a `user_code` directory, and documenting how MCP element classes can be created. Perhaps include a demo MCP element class.
-- Create a PHAR archive to package the MCP server and all its dependencies for easier deployment.
+- Create a Docker image to make deployment easier.
 
 ## Security and safety
 

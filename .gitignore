@@ -30,6 +30,7 @@ composer.phar
 .idea/httpRequests
 
 ### Temporary files
+/build
 /release
 /log
 

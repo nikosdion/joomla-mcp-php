@@ -25,7 +25,14 @@ class LogProvider implements ServiceProviderInterface
 			/** @var OptResult $input */
 			$input = $c['input'];
 
-			$defaultLogDirectory = __DIR__ . '/../../log';
+			if (\Phar::running() !== '')
+			{
+				$defaultLogDirectory = getcwd() . '/log';
+			}
+			else
+			{
+				$defaultLogDirectory = __DIR__ . '/../../log';
+			}
 
 			if ($input->log === null && !is_dir($defaultLogDirectory))
 			{
