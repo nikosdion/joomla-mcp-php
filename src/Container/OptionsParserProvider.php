@@ -22,10 +22,17 @@ class OptionsParserProvider implements ServiceProviderInterface
 
 			$optParser
 				->addCommand(['server'], 'Start the MCP server.')
+				->addCommand(['list-tools'], 'List all available tool categories and tools.')
 				->addFlag(['debug', 'd'], 'Enable debug mode.')
-				->addParam(['log', 'l'], 'OUTFILE', 'Log file path.');
+				->addParam(['log', 'l'], 'OUTFILE', 'Log file path.')
+				->addFlag(['no-panopticon'], 'Exclude all Panopticon tools.')
+				->addFlag(['no-schema'], 'Strip Schema descriptions/constraints from tool input schemas.')
+				->addParam(['categories', 'c'], 'STRING', 'Comma-separated category names to include.')
+				->addParam(['tools', 't'], 'STRING', 'Comma-separated tool names to include.');
 
-			$optParser->addUsageAll();
+			$optParser
+				->addUsage('server', ['debug', 'log', 'no-panopticon', 'no-schema', 'categories', 'tools'])
+				->addUsage('list-tools', []);
 
 			return $optParser;
 		};
