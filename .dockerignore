@@ -1,0 +1,17 @@
+.git
+.idea
+.claude
+.phpunit.cache
+tests/
+bin/
+build/
+release/
+http/
+vendor/
+log/
+Dockerfile
+.dockerignore
+.gitignore
+CLAUDE.md
+*.phar
+phpunit.xml.dist
