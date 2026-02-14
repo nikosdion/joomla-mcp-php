@@ -1,0 +1,35 @@
+### List administrator menus
+GET {{baseUrl}}/api/index.php/v1/menus/administrator
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get administrator menu data
+GET {{baseUrl}}/api/index.php/v1/menus/administrator/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create administrator menu
+POST {{baseUrl}}/api/index.php/v1/menus/administrator
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Admin Menu",
+	"menutype": "test-admin-menu"
+}
+
+### Update administrator menu
+PATCH {{baseUrl}}/api/index.php/v1/menus/administrator/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Updated Admin Menu"
+}
+
+### Delete administrator menu
+DELETE {{baseUrl}}/api/index.php/v1/menus/administrator/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

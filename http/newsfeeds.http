@@ -1,0 +1,49 @@
+### List newsfeeds
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/feeds
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List newsfeeds, with filters
+# Filters:
+# - filter[search]     string  Search by newsfeed name
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[category]   int     Category ID
+# - filter[language]   string  Language code or "*"
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/feeds?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get newsfeed data
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/feeds/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create newsfeed
+POST {{baseUrl}}/api/index.php/v1/newsfeeds/feeds
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"name": "Joomla News",
+	"alias": "joomla-news",
+	"link": "https://www.joomla.org/announcements.feed",
+	"catid": 5,
+	"published": 1,
+	"language": "*"
+}
+
+### Update newsfeed
+PATCH {{baseUrl}}/api/index.php/v1/newsfeeds/feeds/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete newsfeed (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/newsfeeds/feeds/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

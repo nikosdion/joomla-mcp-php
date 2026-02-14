@@ -1,0 +1,48 @@
+### List newsfeed categories
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List newsfeed categories, with filters
+# Filters:
+# - filter[search]     string  Search by category title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[level]      int     Category nesting level
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/categories?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get newsfeed category data
+GET {{baseUrl}}/api/index.php/v1/newsfeeds/categories/5
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create newsfeed category
+POST {{baseUrl}}/api/index.php/v1/newsfeeds/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Newsfeed Category",
+	"alias": "test-newsfeed-category",
+	"parent_id": 0,
+	"published": 1,
+	"language": "*"
+}
+
+### Update newsfeed category
+PATCH {{baseUrl}}/api/index.php/v1/newsfeeds/categories/5
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete newsfeed category (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/newsfeeds/categories/5
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

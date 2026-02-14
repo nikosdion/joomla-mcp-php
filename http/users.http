@@ -1,0 +1,120 @@
+### List users
+GET {{baseUrl}}/api/index.php/v1/users
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List users, with filters
+# Filters:
+# - filter[search]  string  Search by user name
+# - filter[state]   int     0=blocked, 1=active
+# - filter[group]   int     User group ID
+# - filter[range]   string  Date range filter
+GET {{baseUrl}}/api/index.php/v1/users?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get user data
+GET {{baseUrl}}/api/index.php/v1/users/42
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create user
+POST {{baseUrl}}/api/index.php/v1/users
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"name": "John Doe",
+	"username": "johndoe",
+	"email": "john@example.com",
+	"password": "SecureP@ssw0rd!",
+	"groups": [2]
+}
+
+### Update user
+PATCH {{baseUrl}}/api/index.php/v1/users/42
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"name": "John D. Doe"
+}
+
+### Delete user
+DELETE {{baseUrl}}/api/index.php/v1/users/42
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List user groups
+GET {{baseUrl}}/api/index.php/v1/users/groups
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get user group data
+GET {{baseUrl}}/api/index.php/v1/users/groups/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create user group
+POST {{baseUrl}}/api/index.php/v1/users/groups
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Group",
+	"parent_id": 1
+}
+
+### Update user group
+PATCH {{baseUrl}}/api/index.php/v1/users/groups/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Updated Group"
+}
+
+### Delete user group
+DELETE {{baseUrl}}/api/index.php/v1/users/groups/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List viewing access levels
+GET {{baseUrl}}/api/index.php/v1/users/levels
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get viewing access level data
+GET {{baseUrl}}/api/index.php/v1/users/levels/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create viewing access level
+POST {{baseUrl}}/api/index.php/v1/users/levels
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Level",
+	"rules": [1, 6, 7]
+}
+
+### Update viewing access level
+PATCH {{baseUrl}}/api/index.php/v1/users/levels/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Updated Level"
+}
+
+### Delete viewing access level
+DELETE {{baseUrl}}/api/index.php/v1/users/levels/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

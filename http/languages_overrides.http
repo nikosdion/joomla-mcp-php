@@ -1,0 +1,93 @@
+### List site language overrides
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List site language overrides, with filters
+# Filters:
+# - filter[search]  string  Search by key or value
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB?filter[search]=submit
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get a specific site language override
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create site language override
+POST {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"key": "COM_CONTENT_SAVE_SUCCESS",
+	"override": "Article saved successfully!"
+}
+
+### Update site language override
+PATCH {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"override": "Article has been saved."
+}
+
+### Delete site language override
+DELETE {{baseUrl}}/api/index.php/v1/languages/overrides/site/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List administrator language overrides
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/administrator/en-GB
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get a specific administrator language override
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/administrator/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create administrator language override
+POST {{baseUrl}}/api/index.php/v1/languages/overrides/administrator/en-GB
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"key": "COM_CONTENT_SAVE_SUCCESS",
+	"override": "Article saved successfully!"
+}
+
+### Update administrator language override
+PATCH {{baseUrl}}/api/index.php/v1/languages/overrides/administrator/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"override": "Article has been saved."
+}
+
+### Delete administrator language override
+DELETE {{baseUrl}}/api/index.php/v1/languages/overrides/administrator/en-GB/COM_CONTENT_SAVE_SUCCESS
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Search language strings for creating overrides
+# Filters:
+# - filter[language]      string  Language code, e.g. "en-GB"
+# - filter[searchstring]  string  String to search for
+# - filter[searchtype]    string  "constant" or "value"
+GET {{baseUrl}}/api/index.php/v1/languages/overrides/search?filter[language]=en-GB&filter[searchstring]=save&filter[searchtype]=value
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Refresh language override search cache
+POST {{baseUrl}}/api/index.php/v1/languages/overrides/search/cache/refresh
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json

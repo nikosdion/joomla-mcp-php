@@ -1,0 +1,46 @@
+### List content languages
+GET {{baseUrl}}/api/index.php/v1/languages/content
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List content languages, with filters
+# Filters:
+# - filter[published]  int  0=unpublished, 1=published
+GET {{baseUrl}}/api/index.php/v1/languages/content?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get content language data
+GET {{baseUrl}}/api/index.php/v1/languages/content/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create content language
+POST {{baseUrl}}/api/index.php/v1/languages/content
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"lang_code": "fr-FR",
+	"title": "French (France)",
+	"title_native": "Français (France)",
+	"sef": "fr",
+	"image": "fr_fr",
+	"published": 1
+}
+
+### Update content language
+PATCH {{baseUrl}}/api/index.php/v1/languages/content/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete content language
+DELETE {{baseUrl}}/api/index.php/v1/languages/content/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

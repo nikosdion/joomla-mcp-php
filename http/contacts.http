@@ -1,0 +1,62 @@
+### List contacts
+GET {{baseUrl}}/api/index.php/v1/contacts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List contacts, with filters
+# Filters:
+# - filter[search]     string  Search by contact name
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[category]   int     Category ID
+# - filter[language]   string  Language code or "*"
+GET {{baseUrl}}/api/index.php/v1/contacts?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get contact data
+GET {{baseUrl}}/api/index.php/v1/contacts/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create contact
+POST {{baseUrl}}/api/index.php/v1/contacts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"name": "John Doe",
+	"alias": "john-doe",
+	"catid": 4,
+	"published": 1,
+	"email_to": "john@example.com",
+	"language": "*"
+}
+
+### Update contact
+PATCH {{baseUrl}}/api/index.php/v1/contacts/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete contact (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/contacts/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Submit contact form
+POST {{baseUrl}}/api/index.php/v1/contacts/form/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"contact_name": "Jane Doe",
+	"contact_email": "jane@example.com",
+	"contact_subject": "Hello",
+	"contact_message": "This is a test message."
+}

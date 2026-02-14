@@ -1,0 +1,57 @@
+### List site menu items
+GET {{baseUrl}}/api/index.php/v1/menus/site/items
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List site menu items, with filters
+# Filters:
+# - filter[search]     string  Search by title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[menutype]   string  Menu type identifier
+# - filter[level]      int     Menu item nesting level
+GET {{baseUrl}}/api/index.php/v1/menus/site/items?filter[menutype]=mainmenu&filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get site menu item data
+GET {{baseUrl}}/api/index.php/v1/menus/site/items/101
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List available site menu item types
+GET {{baseUrl}}/api/index.php/v1/menus/site/items/types
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create site menu item
+POST {{baseUrl}}/api/index.php/v1/menus/site/items
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Menu Item",
+	"alias": "test-menu-item",
+	"menutype": "mainmenu",
+	"type": "component",
+	"link": "index.php?option=com_content&view=article&id=1",
+	"parent_id": 1,
+	"published": 1,
+	"language": "*"
+}
+
+### Update site menu item
+PATCH {{baseUrl}}/api/index.php/v1/menus/site/items/101
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete site menu item
+DELETE {{baseUrl}}/api/index.php/v1/menus/site/items/101
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

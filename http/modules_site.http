@@ -1,0 +1,53 @@
+### List site modules
+GET {{baseUrl}}/api/index.php/v1/modules/site
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List site modules, with filters
+# Filters:
+# - filter[search]    string  Search by module title
+# - filter[state]     int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[position]  int     Module position
+# - filter[module]    string  Module type (e.g. mod_menu)
+# - filter[access]    int     Access level
+GET {{baseUrl}}/api/index.php/v1/modules/site?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get site module data
+GET {{baseUrl}}/api/index.php/v1/modules/site/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List available site module types
+GET {{baseUrl}}/api/index.php/v1/modules/types/site
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create site module
+POST {{baseUrl}}/api/index.php/v1/modules/site
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Module",
+	"module": "mod_custom",
+	"published": 1,
+	"language": "*"
+}
+
+### Update site module
+PATCH {{baseUrl}}/api/index.php/v1/modules/site/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete site module (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/modules/site/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

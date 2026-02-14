@@ -1,0 +1,49 @@
+### List privacy requests
+GET {{baseUrl}}/api/index.php/v1/privacy/requests
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List privacy requests, with filters
+# Filters:
+# - filter[status]  string  Request status
+GET {{baseUrl}}/api/index.php/v1/privacy/requests?filter[status]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get privacy request data
+GET {{baseUrl}}/api/index.php/v1/privacy/requests/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create privacy request
+POST {{baseUrl}}/api/index.php/v1/privacy/requests
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"email": "user@example.com",
+	"request_type": 1
+}
+
+### Export privacy request data
+GET {{baseUrl}}/api/index.php/v1/privacy/requests/export/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List privacy consents
+GET {{baseUrl}}/api/index.php/v1/privacy/consents
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List privacy consents, with filters
+# Filters:
+# - filter[state]  int  Consent state
+GET {{baseUrl}}/api/index.php/v1/privacy/consents?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get privacy consent data
+GET {{baseUrl}}/api/index.php/v1/privacy/consents/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

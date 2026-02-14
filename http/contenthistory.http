@@ -1,0 +1,15 @@
+### List content history versions for an article
+GET {{baseUrl}}/api/index.php/v1/content/articles/4/contenthistory
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Toggle the keep flag on a content history version
+PATCH {{baseUrl}}/api/index.php/v1/content/articles/4/contenthistory/1/keep
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Delete a content history version
+DELETE {{baseUrl}}/api/index.php/v1/content/articles/4/contenthistory/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

@@ -1,0 +1,13 @@
+### List installed extensions
+GET {{baseUrl}}/api/index.php/v1/extensions
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List installed extensions, with filters
+# Filters:
+# - filter[search]   string  Search by extension name
+# - filter[type]     string  component, module, plugin, template, library, package
+# - filter[enabled]  int     0=disabled, 1=enabled
+GET {{baseUrl}}/api/index.php/v1/extensions?filter[type]=component&filter[enabled]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

@@ -1,0 +1,45 @@
+### List banner clients
+GET {{baseUrl}}/api/index.php/v1/banners/clients
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List banner clients, with filters
+# Filters:
+# - filter[search]  string  Search by client name
+# - filter[state]   int     0=unpublished, 1=published, 2=archived, -2=trashed
+GET {{baseUrl}}/api/index.php/v1/banners/clients?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get banner client data
+GET {{baseUrl}}/api/index.php/v1/banners/clients/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create banner client
+POST {{baseUrl}}/api/index.php/v1/banners/clients
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"contact": "John Doe",
+	"name": "Acme Corp",
+	"email": "john@example.com",
+	"state": 1
+}
+
+### Update banner client
+PATCH {{baseUrl}}/api/index.php/v1/banners/clients/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"state": 0
+}
+
+### Delete banner client (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/banners/clients/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

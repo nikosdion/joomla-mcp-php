@@ -1,0 +1,29 @@
+### List plugins
+GET {{baseUrl}}/api/index.php/v1/plugins
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List plugins, with filters
+# Filters:
+# - filter[search]   string  Search by plugin name
+# - filter[enabled]  int     0=disabled, 1=enabled
+# - filter[folder]   string  Plugin folder/group (e.g. system, content)
+# - filter[element]  string  Plugin element name
+GET {{baseUrl}}/api/index.php/v1/plugins?filter[folder]=system&filter[enabled]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get plugin data
+GET {{baseUrl}}/api/index.php/v1/plugins/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Update plugin
+PATCH {{baseUrl}}/api/index.php/v1/plugins/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"enabled": 0
+}

@@ -1,0 +1,250 @@
+### ===================================================================
+### Panopticon Connector — Extensions
+### ===================================================================
+
+### List installed extensions (Panopticon)
+GET {{baseUrl}}/api/index.php/v1/panopticon/extensions
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List installed extensions, with filters
+# Filters:
+# - filter[search]  string  Search by extension name
+# - filter[type]    string  Extension type
+GET {{baseUrl}}/api/index.php/v1/panopticon/extensions?filter[type]=component
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get extension details
+GET {{baseUrl}}/api/index.php/v1/panopticon/extensions/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Install extension from URL
+POST {{baseUrl}}/api/index.php/v1/panopticon/extensions
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"url": "https://example.com/extension.zip"
+}
+
+### ===================================================================
+### Panopticon Connector — Core Update
+### ===================================================================
+
+### Get core update status
+GET {{baseUrl}}/api/index.php/v1/panopticon/core/update
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Change update source
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/source
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"source": "https://update.joomla.org/core/list.xml"
+}
+
+### Download core update package
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/download
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Download core update package (chunked)
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/download/chunked
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"offset": 0,
+	"length": 1048576
+}
+
+### Activate downloaded update
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/activate
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Disable core update
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/disable
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Run post-update tasks
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/postupdate
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Prepare checksum verification
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/checksum/prepare
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Execute checksum verification step
+POST {{baseUrl}}/api/index.php/v1/panopticon/core/update/checksum/step
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### ===================================================================
+### Panopticon Connector — Akeeba Backup
+### ===================================================================
+
+### Get Akeeba Backup info
+GET {{baseUrl}}/api/index.php/v1/panopticon/akeebabackup/info
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### ===================================================================
+### Panopticon Connector — Admin Tools
+### ===================================================================
+
+### Unblock IP address
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/unblock
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"ip": "192.168.1.100"
+}
+
+### Disable Admin Tools system plugin
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/plugin/disable
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Enable Admin Tools system plugin
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/plugin/enable
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Disable .htaccess protection
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/htaccess/disable
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Enable .htaccess protection
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/htaccess/enable
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Create temporary super user
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/tempsuperuser
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"expiration": 3600
+}
+
+### Start security scan
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/scanner/start
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Execute security scan step
+POST {{baseUrl}}/api/index.php/v1/panopticon/admintools/scanner/step
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### List security scan results
+GET {{baseUrl}}/api/index.php/v1/panopticon/admintools/scans
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Read specific security scan
+GET {{baseUrl}}/api/index.php/v1/panopticon/admintools/scans/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Read scan alert
+GET {{baseUrl}}/api/index.php/v1/panopticon/admintools/scans/1/alerts/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### ===================================================================
+### Panopticon Connector — Update Sites
+### ===================================================================
+
+### List update sites
+GET {{baseUrl}}/api/index.php/v1/panopticon/updatesites
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get update site details
+GET {{baseUrl}}/api/index.php/v1/panopticon/updatesites/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Update an update site
+PATCH {{baseUrl}}/api/index.php/v1/panopticon/updatesites/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"enabled": 1
+}
+
+### Delete an update site
+DELETE {{baseUrl}}/api/index.php/v1/panopticon/updatesites/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Rebuild update sites table
+POST {{baseUrl}}/api/index.php/v1/panopticon/updatesites/rebuild
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### ===================================================================
+### Panopticon Connector — Extension Updates
+### ===================================================================
+
+### Refresh available extension updates
+POST {{baseUrl}}/api/index.php/v1/panopticon/updates/refresh
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Apply pending extension updates
+POST {{baseUrl}}/api/index.php/v1/panopticon/updates/apply
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"eid": "123"
+}
+
+### ===================================================================
+### Panopticon Connector — Template Overrides
+### ===================================================================
+
+### List changed template overrides
+GET {{baseUrl}}/api/index.php/v1/panopticon/template/overrides/changed
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Read a changed template override
+GET {{baseUrl}}/api/index.php/v1/panopticon/template/overrides/changed/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

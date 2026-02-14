@@ -1,0 +1,48 @@
+### List contact categories
+GET {{baseUrl}}/api/index.php/v1/contacts/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List contact categories, with filters
+# Filters:
+# - filter[search]     string  Search by category title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[level]      int     Category nesting level
+GET {{baseUrl}}/api/index.php/v1/contacts/categories?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get contact category data
+GET {{baseUrl}}/api/index.php/v1/contacts/categories/4
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create contact category
+POST {{baseUrl}}/api/index.php/v1/contacts/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Contact Category",
+	"alias": "test-contact-category",
+	"parent_id": 0,
+	"published": 1,
+	"language": "*"
+}
+
+### Update contact category
+PATCH {{baseUrl}}/api/index.php/v1/contacts/categories/4
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete contact category (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/contacts/categories/4
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

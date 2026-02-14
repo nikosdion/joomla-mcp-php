@@ -1,0 +1,46 @@
+### List redirects
+GET {{baseUrl}}/api/index.php/v1/redirects
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List redirects, with filters
+# Filters:
+# - filter[search]     string  Search by URL
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+GET {{baseUrl}}/api/index.php/v1/redirects?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get redirect data
+GET {{baseUrl}}/api/index.php/v1/redirects/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create redirect
+POST {{baseUrl}}/api/index.php/v1/redirects
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"old_url": "/old-page",
+	"new_url": "/new-page",
+	"referer": 301,
+	"published": 1,
+	"comment": "Moved page"
+}
+
+### Update redirect
+PATCH {{baseUrl}}/api/index.php/v1/redirects/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete redirect (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/redirects/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

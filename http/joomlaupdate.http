@@ -1,0 +1,33 @@
+### Health check
+GET {{baseUrl}}/api/index.php/v1/joomlaupdate/healthcheck
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get available update information
+GET {{baseUrl}}/api/index.php/v1/joomlaupdate/update
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Prepare update for installation
+POST {{baseUrl}}/api/index.php/v1/joomlaupdate/update/prepare
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Finalize update installation
+POST {{baseUrl}}/api/index.php/v1/joomlaupdate/update/finalize
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Send success notification
+POST {{baseUrl}}/api/index.php/v1/joomlaupdate/update/notify/success
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+### Send failure notification
+POST {{baseUrl}}/api/index.php/v1/joomlaupdate/update/notify/failed
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json

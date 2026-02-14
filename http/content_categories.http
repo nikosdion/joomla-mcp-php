@@ -1,0 +1,48 @@
+### List content categories
+GET {{baseUrl}}/api/index.php/v1/content/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List content categories, with filters
+# Filters:
+# - filter[search]     string  Search by category title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[level]      int     Category nesting level
+GET {{baseUrl}}/api/index.php/v1/content/categories?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get content category data
+GET {{baseUrl}}/api/index.php/v1/content/categories/2
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create content category
+POST {{baseUrl}}/api/index.php/v1/content/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Category",
+	"alias": "test-category",
+	"parent_id": 0,
+	"published": 1,
+	"language": "*"
+}
+
+### Update content category
+PATCH {{baseUrl}}/api/index.php/v1/content/categories/2
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete content category (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/content/categories/2
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

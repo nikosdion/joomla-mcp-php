@@ -1,0 +1,53 @@
+### List media adapters
+GET {{baseUrl}}/api/index.php/v1/media/adapters
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get a specific media adapter
+GET {{baseUrl}}/api/index.php/v1/media/adapters/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List media files
+GET {{baseUrl}}/api/index.php/v1/media/files
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List media files in a subdirectory
+# Query parameters:
+# - path     string  Subdirectory path
+# - adapter  string  Media adapter name
+GET {{baseUrl}}/api/index.php/v1/media/files?path=images/sampledata
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get a specific media file
+GET {{baseUrl}}/api/index.php/v1/media/files/images/joomla_black.png
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create (upload) a media file
+POST {{baseUrl}}/api/index.php/v1/media/files
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"path": "images/test.txt",
+	"content": "SGVsbG8gV29ybGQ="
+}
+
+### Update a media file
+PATCH {{baseUrl}}/api/index.php/v1/media/files/images/test.txt
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"content": "VXBkYXRlZCBjb250ZW50"
+}
+
+### Delete a media file
+DELETE {{baseUrl}}/api/index.php/v1/media/files/images/test.txt
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

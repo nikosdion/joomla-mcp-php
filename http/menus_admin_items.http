@@ -1,0 +1,57 @@
+### List administrator menu items
+GET {{baseUrl}}/api/index.php/v1/menus/administrator/items
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List administrator menu items, with filters
+# Filters:
+# - filter[search]     string  Search by title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[menutype]   string  Menu type identifier
+# - filter[level]      int     Menu item nesting level
+GET {{baseUrl}}/api/index.php/v1/menus/administrator/items?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get administrator menu item data
+GET {{baseUrl}}/api/index.php/v1/menus/administrator/items/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List available administrator menu item types
+GET {{baseUrl}}/api/index.php/v1/menus/administrator/items/types
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create administrator menu item
+POST {{baseUrl}}/api/index.php/v1/menus/administrator/items
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Admin Menu Item",
+	"alias": "test-admin-menu-item",
+	"menutype": "main",
+	"type": "component",
+	"link": "index.php?option=com_content",
+	"parent_id": 1,
+	"published": 1,
+	"language": "*"
+}
+
+### Update administrator menu item
+PATCH {{baseUrl}}/api/index.php/v1/menus/administrator/items/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete administrator menu item
+DELETE {{baseUrl}}/api/index.php/v1/menus/administrator/items/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

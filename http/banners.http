@@ -1,0 +1,50 @@
+### List banners
+GET {{baseUrl}}/api/index.php/v1/banners
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List banners, with filters
+# Filters:
+# - filter[search]     string  Search by banner name
+# - filter[state]      int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[category]   int     Category ID
+# - filter[client_id]  int     Client ID
+GET {{baseUrl}}/api/index.php/v1/banners?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get banner data
+GET {{baseUrl}}/api/index.php/v1/banners/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create banner
+POST {{baseUrl}}/api/index.php/v1/banners
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"name": "Test Banner",
+	"alias": "test-banner",
+	"catid": 3,
+	"state": 1,
+	"type": "0",
+	"clickurl": "https://www.example.com",
+	"language": "*"
+}
+
+### Update banner
+PATCH {{baseUrl}}/api/index.php/v1/banners/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"state": 0
+}
+
+### Delete banner (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/banners/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

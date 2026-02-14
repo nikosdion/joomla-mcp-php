@@ -1,0 +1,29 @@
+### Read application configuration
+GET {{baseUrl}}/api/index.php/v1/config/application
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Update application configuration
+PATCH {{baseUrl}}/api/index.php/v1/config/application
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"sitename": "My Joomla Site"
+}
+
+### Read component configuration
+GET {{baseUrl}}/api/index.php/v1/config/com_content
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Update component configuration
+PATCH {{baseUrl}}/api/index.php/v1/config/com_content
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"article_layout": "_:default"
+}

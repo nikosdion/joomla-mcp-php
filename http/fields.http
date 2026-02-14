@@ -1,0 +1,46 @@
+### List custom fields for a context
+# Context examples: com_content.article, com_contact.contact, com_users.user
+GET {{baseUrl}}/api/index.php/v1/fields/com_content.article
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List custom fields, with filters
+# Filters:
+# - filter[search]  string  Search by field title
+# - filter[state]   int     0=unpublished, 1=published
+GET {{baseUrl}}/api/index.php/v1/fields/com_content.article?filter[state]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get custom field data
+GET {{baseUrl}}/api/index.php/v1/fields/com_content.article/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create custom field
+POST {{baseUrl}}/api/index.php/v1/fields/com_content.article
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Field",
+	"type": "text",
+	"state": 1,
+	"language": "*"
+}
+
+### Update custom field
+PATCH {{baseUrl}}/api/index.php/v1/fields/com_content.article/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"state": 0
+}
+
+### Delete custom field
+DELETE {{baseUrl}}/api/index.php/v1/fields/com_content.article/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

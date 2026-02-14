@@ -1,0 +1,14 @@
+### List available language packages
+GET {{baseUrl}}/api/index.php/v1/languages
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Install a language package
+POST {{baseUrl}}/api/index.php/v1/languages
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"package": "fr-FR"
+}

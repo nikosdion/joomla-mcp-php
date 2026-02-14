@@ -1,0 +1,43 @@
+### List private messages
+GET {{baseUrl}}/api/index.php/v1/messages
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List private messages, with filters
+# Filters:
+# - filter[state]  int  0=unread, 1=read, -2=trashed
+GET {{baseUrl}}/api/index.php/v1/messages?filter[state]=0
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get private message data
+GET {{baseUrl}}/api/index.php/v1/messages/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create private message
+POST {{baseUrl}}/api/index.php/v1/messages
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"user_id_to": 42,
+	"subject": "Hello",
+	"message": "This is a test message."
+}
+
+### Update private message
+PATCH {{baseUrl}}/api/index.php/v1/messages/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"subject": "Updated Subject"
+}
+
+### Delete private message (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/messages/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

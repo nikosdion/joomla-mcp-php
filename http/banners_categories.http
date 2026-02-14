@@ -1,0 +1,48 @@
+### List banner categories
+GET {{baseUrl}}/api/index.php/v1/banners/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List banner categories, with filters
+# Filters:
+# - filter[search]     string  Search by category title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+# - filter[level]      int     Category nesting level
+GET {{baseUrl}}/api/index.php/v1/banners/categories?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get banner category data
+GET {{baseUrl}}/api/index.php/v1/banners/categories/3
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create banner category
+POST {{baseUrl}}/api/index.php/v1/banners/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Banner Category",
+	"alias": "test-banner-category",
+	"parent_id": 0,
+	"published": 1,
+	"language": "*"
+}
+
+### Update banner category
+PATCH {{baseUrl}}/api/index.php/v1/banners/categories/3
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete banner category (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/banners/categories/3
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json

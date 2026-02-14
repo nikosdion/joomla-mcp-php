@@ -1,0 +1,46 @@
+### List tags
+GET {{baseUrl}}/api/index.php/v1/tags
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### List tags, with filters
+# Filters:
+# - filter[search]     string  Search by tag title
+# - filter[published]  int     0=unpublished, 1=published, 2=archived, -2=trashed
+# - filter[language]   string  Language code or "*"
+GET {{baseUrl}}/api/index.php/v1/tags?filter[published]=1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Get tag data
+GET {{baseUrl}}/api/index.php/v1/tags/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### Create tag
+POST {{baseUrl}}/api/index.php/v1/tags
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"title": "Test Tag",
+	"alias": "test-tag",
+	"published": 1,
+	"language": "*"
+}
+
+### Update tag
+PATCH {{baseUrl}}/api/index.php/v1/tags/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+	"published": 0
+}
+
+### Delete tag (must be trashed first)
+DELETE {{baseUrl}}/api/index.php/v1/tags/1
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
