@@ -47,6 +47,30 @@ Where:
 * `https://www.example.com` is the base URL of your Joomla installation, _without_ the trailing `/api`, _without_ the trailing `/index.php`.
 * `your_joomla_api_token` is the Joomla API token for any active Super User account of your Joomla installation, something that looks like `c2hhMjU2OjI5NDoxNmI5NzU3NWY1YTFhYTBmYWViNjUyMTRlZThmYzc1NTBiYWNkNmM4MjQ5N2ExYzllM2FjY2I5ODYxZjMxOGMx`.
 
+### Using with Claude Code
+
+You can add MCP4Joomla to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) using the `claude mcp add` command:
+
+```bash
+claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server
+```
+
+You can also pass command line options like `--non-destructive` or `--categories` after `server`:
+
+```bash
+claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server --categories=Content,Tags --non-destructive
+```
+
+To use the PHAR archive instead:
+
+```bash
+claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/mcp4joomla.phar server
+```
+
+By default, the server is added to your local scope (current project, current user). Use `--scope project` to share the configuration with your team via `.mcp.json`, or `--scope user` to make it available across all your projects.
+
+You can verify the server was added with `claude mcp list`.
+
 ### Command line options
 
 The `server` command accepts the following optional arguments:
