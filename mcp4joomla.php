@@ -59,6 +59,126 @@ else
 }
 
 /**
+ * Fix tool input schemas to be compatible with JSON Schema draft 2020-12.
+ *
+ * The php-mcp/server schema generator uses array-valued "type" fields (e.g. ["null", "string"])
+ * for nullable parameters. This is valid in draft-07 but rejected by Claude's API which requires
+ * draft 2020-12. This function rewrites those to use "anyOf" instead.
+ *
+ * @param   \PhpMcp\Server\Server  $server  The MCP server whose tool schemas should be fixed.
+ *
+ * @return  void
+ */
+function fixToolSchemas(\PhpMcp\Server\Server $server): void
+{
+	$registry = $server->getRegistry();
+	$ref      = new \ReflectionClass($registry);
+	$prop     = $ref->getProperty('tools');
+	$prop->setAccessible(true);
+	$tools = $prop->getValue($registry);
+
+	$fixed = [];
+
+	foreach ($tools as $name => $registeredTool)
+	{
+		$tool   = $registeredTool->schema;
+		$schema = $tool->inputSchema;
+		$changed = false;
+
+		if (isset($schema['properties']))
+		{
+			foreach ($schema['properties'] as $pname => &$pval)
+			{
+				if (isset($pval['type']) && is_array($pval['type']))
+				{
+					$types = $pval['type'];
+
+					// Remove "null" from the list; handle it via anyOf.
+					$nonNullTypes = array_values(array_filter($types, fn($t) => $t !== 'null'));
+					$hasNull      = count($nonNullTypes) < count($types);
+
+					if ($hasNull && count($nonNullTypes) === 1)
+					{
+						// Common case: ["null", "string"] → anyOf with null
+						$mainSchema = ['type' => $nonNullTypes[0]];
+
+						// Move description, pattern, enum, format to the main schema
+						foreach (['description', 'pattern', 'format'] as $key)
+						{
+							if (isset($pval[$key]))
+							{
+								$mainSchema[$key] = $pval[$key];
+							}
+						}
+
+						// Filter null out of enums too.
+						if (isset($pval['enum']))
+						{
+							$nonNullEnums = array_values(array_filter($pval['enum'], fn($v) => $v !== null));
+
+							if (!empty($nonNullEnums))
+							{
+								$mainSchema['enum'] = $nonNullEnums;
+							}
+						}
+
+						$newPval = [
+							'anyOf' => [
+								$mainSchema,
+								['type' => 'null'],
+							],
+						];
+
+						// Preserve default and description at the top level.
+						if (array_key_exists('default', $pval))
+						{
+							$newPval['default'] = $pval['default'];
+						}
+
+						if (isset($pval['description']))
+						{
+							$newPval['description'] = $pval['description'];
+						}
+
+						$pval    = $newPval;
+						$changed = true;
+					}
+					elseif (!$hasNull && count($nonNullTypes) === 1)
+					{
+						// Single non-null type in array: just simplify.
+						$pval['type'] = $nonNullTypes[0];
+						$changed      = true;
+					}
+				}
+			}
+			unset($pval);
+		}
+
+		if ($changed)
+		{
+			$newTool = new \PhpMcp\Schema\Tool(
+				name: $tool->name,
+				inputSchema: $schema,
+				description: $tool->description,
+				annotations: $tool->annotations,
+			);
+
+			$fixed[$name] = new \PhpMcp\Server\Elements\RegisteredTool(
+				schema: $newTool,
+				handler: $registeredTool->handler,
+				isManual: $registeredTool->isManual,
+			);
+		}
+		else
+		{
+			$fixed[$name] = $registeredTool;
+		}
+	}
+
+	$prop->setValue($registry, $fixed);
+}
+
+/**
  * Recursively loads all PHP files from a directory so their classes become available for discovery.
  *
  * @param   string  $userCodeDir  Absolute path to the user code directory.
@@ -257,6 +377,33 @@ try
 
 	$server = Server::make()
 		->withServerInfo('MCP4Joomla Server', MCP4JOOMLA_VERSION)
+		->withInstructions(<<<'INSTRUCTIONS'
+MCP4Joomla provides tools for managing a Joomla CMS website via its Web Services API. Use these tools whenever the user asks about their Joomla site.
+
+Tool categories and when to search for them:
+- Content: articles and content categories (content_articles_*, content_categories_*). Use for creating, listing, reading, updating, or deleting articles and their categories.
+- Banners: banners, banner categories, and banner clients (banners_*, banners_categories_*, banners_clients_*). Use for managing advertising banners.
+- Config: application and component configuration (config_application_*, config_component_*). Use for reading or changing Joomla settings.
+- Contact: contacts and contact categories (contact_*, contact_categories_*). Use for managing contact entries and submitting contact forms.
+- ContentHistory: content version history (contenthistory_*). Use for viewing or managing revision history of content items.
+- Fields: custom fields and field groups (fields_*, fields_groups_*). Use for managing custom fields on articles, contacts, etc.
+- Installer: installed extensions (installer_extensions_*). Use for listing Joomla extensions (components, modules, plugins).
+- JoomlaUpdate: Joomla core updates (joomlaupdate_*). Use for checking, preparing, and applying Joomla core updates.
+- Languages: content languages, language overrides, and language packages (languages_content_*, languages_overrides_*, languages_packages_*). Use for managing multilingual content and translation overrides.
+- Media: media files and adapters (media_files_*, media_adapters_*). Use for uploading, listing, or deleting images and other media files.
+- Menus: site and administrator menus and menu items (menus_sitemenus_*, menus_siteitems_*, menus_adminmenus_*, menus_adminitems_*). Use for managing navigation menus.
+- Messages: private messages (messages_*). Use for sending and managing private messages between Joomla users.
+- Modules: site and administrator modules (modules_site_*, modules_admin_*). Use for managing sidebar widgets, footers, and other module positions.
+- Newsfeeds: newsfeeds and newsfeed categories (newsfeeds_*, newsfeeds_categories_*). Use for managing RSS/Atom feed aggregation.
+- Panopticon: Panopticon Connector tools for remote site management (panopticon_*). Use for extension updates, backups, security scans, and update site management via Akeeba Panopticon.
+- Plugins: Joomla plugins (plugins_*). Use for listing, reading, or updating plugin settings and state.
+- Privacy: privacy requests and consents (privacy_requests_*, privacy_consents_*). Use for GDPR privacy management.
+- Redirects: URL redirects (redirects_*). Use for managing 301/302 URL redirects.
+- Tags: content tags (tags_*). Use for managing tags applied to articles and other content.
+- Templates: site and administrator template styles (templates_sitestyles_*, templates_adminstyles_*). Use for managing template style configurations.
+- Users: users, user groups, and viewing access levels (users_*, users_groups_*, users_levels_*). Use for managing user accounts and permissions.
+INSTRUCTIONS
+		)
 		->build();
 
 	// If --no-schema is set, create a custom Discoverer with MinimalSchemaGenerator.
@@ -338,6 +485,9 @@ try
 		$removedCount = count($tools) - count($filtered);
 		$log->info("Non-destructive filter applied: {$removedCount} tools removed, " . count($filtered) . " read-only tools remaining.");
 	}
+
+	// Fix tool schemas to be compatible with JSON Schema draft 2020-12.
+	fixToolSchemas($server);
 
 	$transport = new StdioServerTransport();
 	$server->listen($transport);

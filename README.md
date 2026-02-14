@@ -49,27 +49,44 @@ Where:
 
 ### Using with Claude Code
 
-You can add MCP4Joomla to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) using the `claude mcp add` command:
+You can add MCP4Joomla to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) using the `claude mcp add` command.
+
+> [!IMPORTANT]
+> MCP4Joomla provides 212 tools across 21 categories. Claude Code cannot handle this many tools reliably — it will only see a subset of them. **You should always use `--categories` to limit the server to only the categories you need for your session.** Use `php mcp4joomla.php list-tools` to see available categories.
+
+For example, to work with content articles and contacts:
 
 ```bash
-claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server
-```
-
-You can also pass command line options like `--non-destructive` or `--categories` after `server`:
-
-```bash
-claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server --categories=Content,Tags --non-destructive
+claude mcp add mcp4joomla --transport stdio \
+  -e JOOMLA_BASE_URL=https://www.example.com \
+  -e BEARER_TOKEN=your_joomla_api_token \
+  -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server \
+  --categories=Content,Contact
 ```
 
 To use the PHAR archive instead:
 
 ```bash
-claude mcp add mcp4joomla --transport stdio -e JOOMLA_BASE_URL=https://www.example.com -e BEARER_TOKEN=your_joomla_api_token -- /usr/bin/php /path/to/mcp4joomla.phar server
+claude mcp add mcp4joomla --transport stdio \
+  -e JOOMLA_BASE_URL=https://www.example.com \
+  -e BEARER_TOKEN=your_joomla_api_token \
+  -- /usr/bin/php /path/to/mcp4joomla.phar server \
+  --categories=Content,Contact
+```
+
+You can combine `--categories` with other options like `--non-destructive` for read-only access:
+
+```bash
+claude mcp add mcp4joomla --transport stdio \
+  -e JOOMLA_BASE_URL=https://www.example.com \
+  -e BEARER_TOKEN=your_joomla_api_token \
+  -- /usr/bin/php /path/to/joomla-mcp-php/mcp4joomla.php server \
+  --categories=Content,Menus,Tags --non-destructive
 ```
 
 By default, the server is added to your local scope (current project, current user). Use `--scope project` to share the configuration with your team via `.mcp.json`, or `--scope user` to make it available across all your projects.
 
-You can verify the server was added with `claude mcp list`.
+You can verify the server was added with `claude mcp list`, and check server status with `/mcp` inside Claude Code.
 
 ### Command line options
 
