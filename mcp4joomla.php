@@ -89,6 +89,13 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 		{
 			foreach ($schema['properties'] as $pname => &$pval)
 			{
+				// Strip enum from non-string types (Google Gemini API only allows enum on strings).
+				if (isset($pval['enum']) && isset($pval['type']) && is_string($pval['type']) && $pval['type'] !== 'string')
+				{
+					unset($pval['enum']);
+					$changed = true;
+				}
+
 				// Fix draft-07 boolean exclusiveMinimum/exclusiveMaximum to draft 2020-12 numeric form.
 				if (isset($pval['exclusiveMinimum']) && $pval['exclusiveMinimum'] === true && isset($pval['minimum']))
 				{
@@ -134,8 +141,8 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 							}
 						}
 
-						// Filter null out of enums too.
-						if (isset($pval['enum']))
+						// Only keep enum for string types (Google Gemini API restriction).
+						if (isset($pval['enum']) && $nonNullTypes[0] === 'string')
 						{
 							$nonNullEnums = array_values(array_filter($pval['enum'], fn($v) => $v !== null));
 
