@@ -102,8 +102,16 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 						// Common case: ["null", "string"] → anyOf with null
 						$mainSchema = ['type' => $nonNullTypes[0]];
 
-						// Move description, pattern, enum, format to the main schema
-						foreach (['description', 'pattern', 'format'] as $key)
+						// Move validation keywords to the main schema
+						$keywords = [
+							'description', 'pattern', 'format',
+							'items', 'minItems', 'maxItems', 'uniqueItems',
+							'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum',
+							'minLength', 'maxLength',
+							'properties', 'required', 'additionalProperties',
+						];
+
+						foreach ($keywords as $key)
 						{
 							if (isset($pval[$key]))
 							{
