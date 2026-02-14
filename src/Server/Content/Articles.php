@@ -17,6 +17,7 @@ use Dionysopoulos\Mcp4Joomla\Utility\TitleToAliasTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
+use PhpMcp\Server\Attributes\Schema;
 
 /**
  * MCP elements for Joomla! articles managements

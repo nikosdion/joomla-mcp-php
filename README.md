@@ -10,8 +10,8 @@ This MCP server is an implementation of the MCP protocol for Joomla 5 and later.
 
 ## Requirements
 
-* PHP 8.1 or later.
-* A Joomla 5.0 or later installation (it _might_ work on 4.4, but I haven't tested it).
+* PHP 8.1 or later; PHP 8.4 recommended.
+* A Joomla 5.2 or later installation, including 6.x
 * A Joomla API token for a Super User account.
 
 ## Usage
@@ -276,9 +276,6 @@ class MyCustomTool
 | `ArticleTextTrait` | Convert Markdown to HTML via CommonMark. |
 | `TitleToAliasTrait` | Generate URL-safe slugs from titles. |
 
-> [!NOTE]
-> The `#[Schema]` attributes on tool method parameters are commented out in the source (removed at runtime due to compatibility), but are kept as documentation. Your user code tools can use them the same way.
-
 ### User code filtering
 
 User code tools are always discovered regardless of `--categories` and `--no-panopticon`, but they **are** subject to `--tools`, `--non-destructive`, and `--no-schema` filtering.
@@ -333,7 +330,7 @@ This project could not have been possible without the following resources:
 ## Copyright statement
 
 MCP4Joomla – An MCP server for Joomla 5 and later, written in PHP.
-Copyright (C) 2025  Nicholas K. Dionysopoulos
+Copyright (C) 2025–2026  Nicholas K. Dionysopoulos
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
