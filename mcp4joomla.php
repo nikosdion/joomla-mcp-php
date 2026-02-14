@@ -89,6 +89,21 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 		{
 			foreach ($schema['properties'] as $pname => &$pval)
 			{
+				// Fix draft-07 boolean exclusiveMinimum/exclusiveMaximum to draft 2020-12 numeric form.
+				if (isset($pval['exclusiveMinimum']) && $pval['exclusiveMinimum'] === true && isset($pval['minimum']))
+				{
+					$pval['exclusiveMinimum'] = $pval['minimum'];
+					unset($pval['minimum']);
+					$changed = true;
+				}
+
+				if (isset($pval['exclusiveMaximum']) && $pval['exclusiveMaximum'] === true && isset($pval['maximum']))
+				{
+					$pval['exclusiveMaximum'] = $pval['maximum'];
+					unset($pval['maximum']);
+					$changed = true;
+				}
+
 				if (isset($pval['type']) && is_array($pval['type']))
 				{
 					$types = $pval['type'];
