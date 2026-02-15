@@ -12,6 +12,7 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\TitleToAliasTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
@@ -28,6 +29,7 @@ class MenuItems
 	use VarToLogTrait;
 	use AutoLoggingTrait;
 	use TitleToAliasTrait;
+	use ReadMergeUpdateTrait;
 
 	#[McpTool(
 		name: 'menus_siteitems_list',
@@ -240,11 +242,14 @@ class MenuItems
 			'home'         => $home,
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/menus/site/items/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'menuitems', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

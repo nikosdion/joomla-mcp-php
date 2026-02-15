@@ -12,6 +12,7 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +27,7 @@ class Overrides
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
 
 	// =========================================================================
 	// Site language overrides
@@ -133,10 +135,13 @@ class Overrides
 		$this->autologMCPTool();
 
 		$postData = ['override' => $value];
+		$writableFields = array_keys($postData);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/languages/overrides/site/' . $language . '/' . $key);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'languages', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 
@@ -275,10 +280,13 @@ class Overrides
 		$this->autologMCPTool();
 
 		$postData = ['override' => $value];
+		$writableFields = array_keys($postData);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/languages/overrides/administrator/' . $language . '/' . $key);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'languages', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

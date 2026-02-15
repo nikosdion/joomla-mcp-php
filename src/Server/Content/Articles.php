@@ -135,7 +135,13 @@ class Articles
 		#[Schema(description: 'Optional note for the article')]
 		?string $note = null,
 		#[Schema(description: 'An array of tag IDs to associate with the article', items: ['type' => 'integer'], minItems: 0, uniqueItems: true)]
-		?array $tags = null
+		?array $tags = null,
+		#[Schema(description: 'Optional nested images payload (Joomla format)')]
+		?array $images = null,
+		#[Schema(description: 'Optional nested URLs payload (Joomla format)')]
+		?array $urls = null,
+		#[Schema(description: 'Optional nested metadata payload (Joomla format)')]
+		?array $metadata = null
 	)
 	{
 		$this->autologMCPTool();
@@ -325,12 +331,18 @@ class Articles
 		#[Schema(description: 'Optional note for the article')]
 		?string $note = null,
 		#[Schema(description: 'An array of tag IDs to associate with the article', items: ['type' => 'integer'], minItems: 0, uniqueItems: true)]
-		?array $tags = null
+		?array $tags = null,
+		#[Schema(description: 'Optional nested images payload (Joomla field names)')]
+		?array $images = null,
+		#[Schema(description: 'Optional nested URLs payload (Joomla field names)')]
+		?array $urls = null,
+		#[Schema(description: 'Optional nested metadata payload (Joomla field names)')]
+		?array $metadata = null
 	)
 	{
 		$this->autologMCPTool();
 
-		$postData = [
+		$incomingData = [
 			'title'            => $title,
 			'alias'            => $alias,
 			'catid'            => $catId,
@@ -376,39 +388,178 @@ class Articles
 			'tags'             => $tags,
 			'featured_up'      => $featuredStartTime,
 			'featured_down'    => $featuredEndTime,
-			'introtext'        => $this->toHtml($introText),
-			'fulltext'         => $this->toHtml($fullText),
+			'introtext'        => $introText !== null ? $this->toHtml($introText) : null,
+			'fulltext'         => $fullText !== null ? $this->toHtml($fullText) : null,
 		];
 
-		$postData['images']   = array_filter($postData['images'], fn($v) => $v !== null);
-		$postData['urls']     = array_filter($postData['urls'], fn($v) => $v !== null);
-		$postData['metadata'] = array_filter($postData['metadata'], fn($v) => $v !== null);
+		$imagesData   = $this->normaliseNestedArticleField($images);
+		$urlsData     = $this->normaliseNestedArticleField($urls);
+		$metadataData = $this->normaliseNestedArticleField($metadata);
 
-		if (empty($postData['images']))
+		$incomingData['images']   = array_filter($incomingData['images'], fn($v) => $v !== null);
+		$incomingData['urls']     = array_filter($incomingData['urls'], fn($v) => $v !== null);
+		$incomingData['metadata'] = array_filter($incomingData['metadata'], fn($v) => $v !== null);
+
+		if (!empty($imagesData))
 		{
-			unset($postData['images']);
+			$incomingData['images'] = array_replace($imagesData, $incomingData['images']);
 		}
 
-		if (empty($postData['urls']))
+		if (!empty($urlsData))
 		{
-			unset($postData['urls']);
-		}
-		if (empty($postData['metadata']))
-		{
-			unset($postData['metadata']);
+			$incomingData['urls'] = array_replace($urlsData, $incomingData['urls']);
 		}
 
-		$postData = array_filter($postData, fn($v) => $v !== null);
+		if (!empty($metadataData))
+		{
+			$incomingData['metadata'] = array_replace($metadataData, $incomingData['metadata']);
+		}
+
+		if (empty($incomingData['images']))
+		{
+			unset($incomingData['images']);
+		}
+
+		if (empty($incomingData['urls']))
+		{
+			unset($incomingData['urls']);
+		}
+		if (empty($incomingData['metadata']))
+		{
+			unset($incomingData['metadata']);
+		}
+
+		$incomingData = array_filter($incomingData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/content/articles/' . $articleId);
+
+		$currentResponse = $http->get($uri);
+
+		$this->handlePossibleJoomlaAPIError($currentResponse);
+
+		$currentData = $this->getDataFromResponse($currentResponse, 'articles');
+
+		if (!isset($currentData->data->attributes) || !is_object($currentData->data->attributes))
+		{
+			throw new \RuntimeException('Failed to process Joomla API response (no attributes in article data).');
+		}
+
+		$currentAttributes = $currentData->data->attributes;
+		$postData          = $this->getUpdateArticlePayloadFromAttributes($currentAttributes);
+
+		if (isset($incomingData['images']))
+		{
+			$postData['images'] = array_replace($postData['images'], $incomingData['images']);
+			unset($incomingData['images']);
+		}
+
+		if (isset($incomingData['urls']))
+		{
+			$postData['urls'] = array_replace($postData['urls'], $incomingData['urls']);
+			unset($incomingData['urls']);
+		}
+
+		if (isset($incomingData['metadata']))
+		{
+			$postData['metadata'] = array_replace($postData['metadata'], $incomingData['metadata']);
+			unset($incomingData['metadata']);
+		}
+
+		$postData = array_replace($postData, $incomingData);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
 		return $this->getDataFromResponse($response, 'articles');
+	}
+
+	private function getUpdateArticlePayloadFromAttributes(object $attributes): array
+	{
+		$images = $this->normaliseNestedArticleField($attributes->images ?? null);
+		$urls = $this->normaliseNestedArticleField($attributes->urls ?? null);
+		$metadata = $this->normaliseNestedArticleField($attributes->metadata ?? null);
+
+		return [
+			'title'            => $attributes->title ?? null,
+			'alias'            => $attributes->alias ?? null,
+			'catid'            => $attributes->catid ?? null,
+			'state'            => $attributes->state ?? null,
+			'created'          => $attributes->created ?? null,
+			'created_by'       => $attributes->created_by ?? null,
+			'created_by_alias' => $attributes->created_by_alias ?? null,
+			'publish_up'       => $attributes->publish_up ?? null,
+			'publish_down'     => $attributes->publish_down ?? null,
+			'images'           => [
+				'image_intro'            => $images['image_intro'] ?? null,
+				'image_intro_alt'        => $images['image_intro_alt'] ?? null,
+				'float_intro'            => $images['float_intro'] ?? null,
+				'image_intro_caption'    => $images['image_intro_caption'] ?? null,
+				'image_fulltext'         => $images['image_fulltext'] ?? null,
+				'image_fulltext_alt'     => $images['image_fulltext_alt'] ?? null,
+				'float_fulltext'         => $images['float_fulltext'] ?? null,
+				'image_fulltext_caption' => $images['image_fulltext_caption'] ?? null,
+			],
+			'urls'             => [
+				'urla'     => $urls['urla'] ?? null,
+				'urlatext' => $urls['urlatext'] ?? null,
+				'targeta'  => $urls['targeta'] ?? null,
+				'urlb'     => $urls['urlb'] ?? null,
+				'urlbtext' => $urls['urlbtext'] ?? null,
+				'targetb'  => $urls['targetb'] ?? null,
+				'urlc'     => $urls['urlc'] ?? null,
+				'urlctext' => $urls['urlctext'] ?? null,
+				'targetc'  => $urls['targetc'] ?? null,
+			],
+			'metakey'          => $attributes->metakey ?? null,
+			'metadesc'         => $attributes->metadesc ?? null,
+			'access'           => $attributes->access ?? null,
+			'hits'             => $attributes->hits ?? null,
+			'metadata'         => [
+				'robots' => $metadata['robots'] ?? null,
+				'author' => $metadata['author'] ?? null,
+				'rights' => $metadata['rights'] ?? null,
+			],
+			'featured'         => $attributes->featured ?? null,
+			'language'         => $attributes->language ?? null,
+			'note'             => $attributes->note ?? null,
+			'tags'             => $attributes->tags ?? null,
+			'featured_up'      => $attributes->featured_up ?? null,
+			'featured_down'    => $attributes->featured_down ?? null,
+			'introtext'        => $attributes->introtext ?? null,
+			'fulltext'         => $attributes->fulltext ?? null,
+		];
+	}
+
+	private function normaliseNestedArticleField(mixed $field): array
+	{
+		if (is_array($field))
+		{
+			return $field;
+		}
+
+		if (is_object($field))
+		{
+			return (array) $field;
+		}
+
+		if (!is_string($field) || trim($field) === '')
+		{
+			return [];
+		}
+
+		try
+		{
+			$decoded = json_decode($field, true, flags: JSON_THROW_ON_ERROR);
+		}
+		catch (\JsonException)
+		{
+			return [];
+		}
+
+		return is_array($decoded) ? $decoded : [];
 	}
 
 	#[McpTool(

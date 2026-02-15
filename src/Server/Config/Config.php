@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class Config
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'config_application_read',
@@ -52,17 +56,19 @@ class Config
 		annotations: new ToolAnnotations(idempotentHint: true)
 	)]
 	public function updateApplicationConfig(
-		#[Schema(description: 'JSON string of configuration key-value pairs to update')]
-		string $configData
+		#[Schema(description: 'Configuration key-value pairs as a JSON string or object')]
+		array|string $configData
 	)
 	{
 		$this->autologMCPTool();
 
-		$postData = json_decode($configData, true);
+		$postData = $this->normaliseJsonObjectInput($configData, 'configData');
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/config/application');
+
+		$postData = $this->prepareReadMergeUpdatePayloadRecursive($http, (string) $uri, 'application', $postData);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 
@@ -101,17 +107,19 @@ class Config
 	public function updateComponentConfig(
 		#[Schema(description: 'The component name, e.g. "com_content"')]
 		string $componentName,
-		#[Schema(description: 'JSON string of configuration key-value pairs to update')]
-		string $configData
+		#[Schema(description: 'Configuration key-value pairs as a JSON string or object')]
+		array|string $configData
 	)
 	{
 		$this->autologMCPTool();
 
-		$postData = json_decode($configData, true);
+		$postData = $this->normaliseJsonObjectInput($configData, 'configData');
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/config/' . $componentName);
+
+		$postData = $this->prepareReadMergeUpdatePayloadRecursive($http, (string) $uri, 'component', $postData);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class FieldGroups
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'fields_groups_list',
@@ -107,8 +111,8 @@ class FieldGroups
 		string $language = '*',
 		#[Schema(description: 'Optional note for the field group')]
 		?string $note = null,
-		#[Schema(description: 'JSON string of field group parameters')]
-		?string $params = null
+		#[Schema(description: 'Field group parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -120,7 +124,7 @@ class FieldGroups
 			'access'      => $access,
 			'language'    => $language,
 			'note'        => $note,
-			'params'      => $params,
+			'params'      => $this->normaliseJsonCompatibleInput($params),
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -158,8 +162,8 @@ class FieldGroups
 		?string $language = null,
 		#[Schema(description: 'Optional note for the field group')]
 		?string $note = null,
-		#[Schema(description: 'JSON string of field group parameters')]
-		?string $params = null
+		#[Schema(description: 'Field group parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -171,14 +175,17 @@ class FieldGroups
 			'access'      => $access,
 			'language'    => $language,
 			'note'        => $note,
-			'params'      => $params,
+			'params'      => $this->normaliseJsonCompatibleInput($params),
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/fields/groups/' . $context . '/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'fieldgroups', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

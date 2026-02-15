@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class AdminStyles
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'templates_adminstyles_list',
@@ -95,8 +99,8 @@ class AdminStyles
 		string $template,
 		#[Schema(description: 'Whether this is the default administrator template style')]
 		?bool $home = false,
-		#[Schema(description: 'JSON string of template style parameters')]
-		?string $params = null
+		#[Schema(description: 'Template style parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -105,7 +109,7 @@ class AdminStyles
 			'title'    => $title,
 			'template' => $template,
 			'home'     => $home,
-			'params'   => $params,
+			'params'   => $this->normaliseJsonCompatibleInput($params),
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -135,8 +139,8 @@ class AdminStyles
 		?string $template = null,
 		#[Schema(description: 'Whether this is the default administrator template style')]
 		?bool $home = null,
-		#[Schema(description: 'JSON string of template style parameters')]
-		?string $params = null
+		#[Schema(description: 'Template style parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -145,14 +149,17 @@ class AdminStyles
 			'title'    => $title,
 			'template' => $template,
 			'home'     => $home,
-			'params'   => $params,
+			'params'   => $this->normaliseJsonCompatibleInput($params),
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/templates/styles/administrator/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'styles', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

@@ -12,6 +12,7 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +27,7 @@ class Groups
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
 
 	#[McpTool(
 		name: 'users_groups_list',
@@ -129,11 +131,14 @@ class Groups
 			'parent_id' => $parentId,
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/users/groups/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'groups', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

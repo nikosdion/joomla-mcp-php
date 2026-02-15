@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class Fields
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'fields_list',
@@ -115,10 +119,10 @@ class Fields
 		string $language = '*',
 		#[Schema(description: 'Default value for the field')]
 		?string $default_value = null,
-		#[Schema(description: 'JSON string of field parameters')]
-		?string $params = null,
-		#[Schema(description: 'JSON string of field-specific parameters')]
-		?string $fieldparams = null
+		#[Schema(description: 'Field parameters as a JSON string or object')]
+		array|string|null $params = null,
+		#[Schema(description: 'Field-specific parameters as a JSON string or object')]
+		array|string|null $fieldparams = null
 	)
 	{
 		$this->autologMCPTool();
@@ -134,8 +138,8 @@ class Fields
 			'group_id'      => $group_id,
 			'language'      => $language,
 			'default_value' => $default_value,
-			'params'        => $params,
-			'fieldparams'   => $fieldparams,
+			'params'        => $this->normaliseJsonCompatibleInput($params),
+			'fieldparams'   => $this->normaliseJsonCompatibleInput($fieldparams),
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -181,10 +185,10 @@ class Fields
 		?string $language = null,
 		#[Schema(description: 'Default value for the field')]
 		?string $default_value = null,
-		#[Schema(description: 'JSON string of field parameters')]
-		?string $params = null,
-		#[Schema(description: 'JSON string of field-specific parameters')]
-		?string $fieldparams = null
+		#[Schema(description: 'Field parameters as a JSON string or object')]
+		array|string|null $params = null,
+		#[Schema(description: 'Field-specific parameters as a JSON string or object')]
+		array|string|null $fieldparams = null
 	)
 	{
 		$this->autologMCPTool();
@@ -200,15 +204,18 @@ class Fields
 			'group_id'      => $group_id,
 			'language'      => $language,
 			'default_value' => $default_value,
-			'params'        => $params,
-			'fieldparams'   => $fieldparams,
+			'params'        => $this->normaliseJsonCompatibleInput($params),
+			'fieldparams'   => $this->normaliseJsonCompatibleInput($fieldparams),
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/fields/' . $context . '/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'fields', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

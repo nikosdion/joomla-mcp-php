@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class AdminModules
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'modules_admin_list',
@@ -134,8 +138,8 @@ class AdminModules
 		string $language = '*',
 		#[Schema(description: 'Menu assignment')]
 		?string $assignment = null,
-		#[Schema(description: 'JSON string of module parameters')]
-		?string $params = null
+		#[Schema(description: 'Module parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -150,7 +154,7 @@ class AdminModules
 			'ordering'   => $ordering,
 			'language'   => $language,
 			'assignment' => $assignment,
-			'params'     => is_string($params) ? json_decode($params, true) : $params,
+			'params'     => $this->normaliseJsonCompatibleInput($params),
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -195,8 +199,8 @@ class AdminModules
 		?string $language = null,
 		#[Schema(description: 'Menu assignment')]
 		?string $assignment = null,
-		#[Schema(description: 'JSON string of module parameters')]
-		?string $params = null
+		#[Schema(description: 'Module parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -211,14 +215,17 @@ class AdminModules
 			'ordering'   => $ordering,
 			'language'   => $language,
 			'assignment' => $assignment,
-			'params'     => is_string($params) ? json_decode($params, true) : $params,
+			'params'     => $this->normaliseJsonCompatibleInput($params),
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/modules/administrator/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'modules', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 

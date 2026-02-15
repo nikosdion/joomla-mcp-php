@@ -174,14 +174,78 @@ class ArticlesTest extends TestCase
 		);
 	}
 
-	public function testUpdateArticleFiltersNulls(): void
+	public function testUpdateArticleReadsRecordAndMergesChanges(): void
 	{
-		$body = json_encode([
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'articles',
+				'id'         => '42',
+				'attributes' => [
+					'title'            => 'Existing Title',
+					'alias'            => 'existing-title',
+					'catid'            => 2,
+					'state'            => 1,
+					'created'          => '2025-01-01 00:00:00',
+					'created_by'       => 123,
+					'created_by_alias' => 'Existing Author',
+					'publish_up'       => '2025-01-01 00:00:00',
+					'publish_down'     => null,
+					'images'           => [
+						'image_intro'            => 'images/old-intro.jpg',
+						'image_intro_alt'        => 'Old intro alt',
+						'float_intro'            => 'left',
+						'image_intro_caption'    => 'Old intro caption',
+						'image_fulltext'         => 'images/old-full.jpg',
+						'image_fulltext_alt'     => 'Old full alt',
+						'float_fulltext'         => 'none',
+						'image_fulltext_caption' => 'Old full caption',
+					],
+					'urls'             => [
+						'urla'     => 'https://a.example.com',
+						'urlatext' => 'URL A',
+						'targeta'  => '_blank',
+						'urlb'     => '',
+						'urlbtext' => '',
+						'targetb'  => '',
+						'urlc'     => '',
+						'urlctext' => '',
+						'targetc'  => '',
+					],
+					'metakey'          => 'foo,bar',
+					'metadesc'         => 'Existing meta description',
+					'access'           => 1,
+					'hits'             => 5,
+					'metadata'         => [
+						'robots' => 'index, follow',
+						'author' => 'Existing Meta Author',
+						'rights' => 'All rights reserved',
+					],
+					'featured'         => 0,
+					'language'         => '*',
+					'note'             => 'Existing note',
+					'tags'             => [7, 8],
+					'featured_up'      => null,
+					'featured_down'    => null,
+					'introtext'        => '<p>Existing intro</p>',
+					'fulltext'         => '<p>Existing full</p>',
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
 			'data' => [
 				'type' => 'articles',
 				'id'   => '42',
 			],
 		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->with($this->callback(function ($url) {
+				return str_contains((string) $url, 'v1/content/articles/42');
+			}))
+			->willReturn(createJoomlaResponse(200, $readBody));
 
 		$this->mockHttp
 			->expects($this->once())
@@ -192,19 +256,148 @@ class ArticlesTest extends TestCase
 				}),
 				$this->callback(function ($data) {
 					$decoded = json_decode($data, true);
-					// Only the provided fields should be present
-					return isset($decoded['title'])
-						&& !array_key_exists('catid', $decoded)
-						&& !array_key_exists('alias', $decoded);
+					return $decoded['title'] === 'Updated Title'
+						&& $decoded['alias'] === 'existing-title'
+						&& $decoded['catid'] === 2
+						&& $decoded['images']['image_intro'] === 'images/new-intro.jpg'
+						&& $decoded['images']['image_fulltext'] === 'images/old-full.jpg'
+						&& $decoded['metadata']['author'] === 'Existing Meta Author'
+						&& $decoded['introtext'] === '<p>Existing intro</p>'
+						&& $decoded['fulltext'] === '<p>Existing full</p>';
 				}),
 				$this->anything(),
 				$this->anything()
 			)
-			->willReturn(createJoomlaResponse(200, $body));
+			->willReturn(createJoomlaResponse(200, $updateBody));
 
 		$this->articles->updateArticle(
 			articleId: 42,
-			title: 'Updated Title'
+			title: 'Updated Title',
+			imageIntro: 'images/new-intro.jpg',
+		);
+	}
+
+	public function testUpdateArticleParsesJsonEncodedNestedFields(): void
+	{
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'articles',
+				'id'         => '42',
+				'attributes' => [
+					'title'    => 'Existing Title',
+					'alias'    => 'existing-title',
+					'catid'    => 2,
+					'images'   => json_encode([
+						'image_intro'            => 'images/old-intro.jpg',
+						'image_intro_alt'        => 'Old intro alt',
+						'float_intro'            => 'left',
+						'image_intro_caption'    => 'Old intro caption',
+						'image_fulltext'         => 'images/old-full.jpg',
+						'image_fulltext_alt'     => 'Old full alt',
+						'float_fulltext'         => 'none',
+						'image_fulltext_caption' => 'Old full caption',
+					]),
+					'urls'     => json_encode([
+						'urla'     => 'https://a.example.com',
+						'urlatext' => 'URL A',
+						'targeta'  => '_blank',
+					]),
+					'metadata' => json_encode([
+						'robots' => 'index, follow',
+						'author' => 'Existing Meta Author',
+						'rights' => 'All rights reserved',
+					]),
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
+			'data' => [
+				'type' => 'articles',
+				'id'   => '42',
+			],
+		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->with(
+				$this->anything(),
+				$this->callback(function ($data) {
+					$decoded = json_decode($data, true);
+
+					return $decoded['images']['image_intro'] === 'images/new-intro.jpg'
+						&& $decoded['images']['image_fulltext'] === 'images/old-full.jpg'
+						&& $decoded['urls']['urla'] === 'https://a.example.com'
+						&& $decoded['metadata']['author'] === 'Existing Meta Author';
+				}),
+				$this->anything(),
+				$this->anything()
+			)
+			->willReturn(createJoomlaResponse(200, $updateBody));
+
+		$this->articles->updateArticle(
+			articleId: 42,
+			imageIntro: 'images/new-intro.jpg',
+		);
+	}
+
+	public function testUpdateArticleAcceptsNestedImagesPayload(): void
+	{
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'articles',
+				'id'         => '1',
+				'attributes' => [
+					'title'    => 'Existing Title',
+					'alias'    => 'existing-title',
+					'catid'    => 2,
+					'images'   => [
+						'image_intro' => 'images/old-intro.jpg',
+					],
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
+			'data' => [
+				'type' => 'articles',
+				'id'   => '1',
+			],
+		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->with(
+				$this->anything(),
+				$this->callback(function ($data) {
+					$decoded = json_decode($data, true);
+
+					return $decoded['catid'] === 8
+						&& $decoded['images']['image_intro'] === 'https://cdn.pixabay.com/photo/2021/05/22/22/35/black-hole-6274731_1280.jpg';
+				}),
+				$this->anything(),
+				$this->anything()
+			)
+			->willReturn(createJoomlaResponse(200, $updateBody));
+
+		$this->articles->updateArticle(
+			articleId: 1,
+			catId: 8,
+			images: [
+				'image_intro' => 'https://cdn.pixabay.com/photo/2021/05/22/22/35/black-hole-6274731_1280.jpg',
+			],
 		);
 	}
 

@@ -132,14 +132,41 @@ class TagsTest extends TestCase
 		$this->assertSame('10', $result->data->id);
 	}
 
-	public function testUpdateTagFiltersNulls(): void
+	public function testUpdateTagReadsRecordAndMergesChanges(): void
 	{
-		$body = json_encode([
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'tags',
+				'id'         => '5',
+				'attributes' => [
+					'title'       => 'Existing Tag',
+					'alias'       => 'existing-tag',
+					'published'   => 1,
+					'parent_id'   => 12,
+					'access'      => 1,
+					'language'    => '*',
+					'description' => 'Existing description',
+					'metadesc'    => 'Existing metadesc',
+					'metakey'     => 'foo,bar',
+					'note'        => 'Existing note',
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
 			'data' => [
 				'type' => 'tags',
 				'id'   => '5',
 			],
 		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->with($this->callback(function ($url) {
+				return str_contains((string) $url, 'v1/tags/5');
+			}))
+			->willReturn(createJoomlaResponse(200, $readBody));
 
 		$this->mockHttp
 			->expects($this->once())
@@ -150,14 +177,14 @@ class TagsTest extends TestCase
 				}),
 				$this->callback(function ($data) {
 					$decoded = json_decode($data, true);
-					return isset($decoded['title'])
-						&& !array_key_exists('alias', $decoded)
-						&& !array_key_exists('parent_id', $decoded);
+					return $decoded['title'] === 'Updated Tag'
+						&& $decoded['alias'] === 'existing-tag'
+						&& $decoded['parent_id'] === 12;
 				}),
 				$this->anything(),
 				$this->anything()
 			)
-			->willReturn(createJoomlaResponse(200, $body));
+			->willReturn(createJoomlaResponse(200, $updateBody));
 
 		$this->tags->updateTag(id: 5, title: 'Updated Tag');
 	}

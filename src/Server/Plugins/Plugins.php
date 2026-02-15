@@ -12,6 +12,8 @@ use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\GetDataFromResponseTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HandleJoomlaAPIErrorTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
+use Dionysopoulos\Mcp4Joomla\Utility\JsonInputCompatibilityTrait;
+use Dionysopoulos\Mcp4Joomla\Utility\ReadMergeUpdateTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
 use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
@@ -26,6 +28,8 @@ class Plugins
 	use GetDataFromResponseTrait;
 	use VarToLogTrait;
 	use AutoLoggingTrait;
+	use ReadMergeUpdateTrait;
+	use JsonInputCompatibilityTrait;
 
 	#[McpTool(
 		name: 'plugins_list',
@@ -112,8 +116,8 @@ class Plugins
 		?int $access = null,
 		#[Schema(description: 'The ordering of the plugin within its group')]
 		?int $ordering = null,
-		#[Schema(description: 'JSON string of plugin parameters')]
-		?string $params = null
+		#[Schema(description: 'Plugin parameters as a JSON string or object')]
+		array|string|null $params = null
 	)
 	{
 		$this->autologMCPTool();
@@ -122,14 +126,17 @@ class Plugins
 			'enabled'  => $enabled,
 			'access'   => $access,
 			'ordering' => $ordering,
-			'params'   => $params,
+			'params'   => $this->normaliseJsonCompatibleInput($params),
 		];
 
+		$writableFields = array_keys($postData);
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/plugins/' . $id);
+
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'plugins', $postData, $writableFields);
 
 		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
 
