@@ -275,7 +275,14 @@ class Banners
 	{
 		$this->autologMCPTool();
 
-		return $this->updateBanner(id: $id, state: -2);
+		/** @var HttpDecorator $http */
+		$http     = Factory::getContainer()->get('http');
+		$uri      = $http->getUri('v1/banners/' . $id);
+		$response = $http->patch($uri, json_encode(['state' => -2]), ['Content-Type' => 'application/json']);
+
+		$this->handlePossibleJoomlaAPIError($response);
+
+		return $this->getDataFromResponse($response, 'banners');
 	}
 
 	#[McpTool(

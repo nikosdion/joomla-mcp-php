@@ -299,7 +299,14 @@ class Contacts
 	{
 		$this->autologMCPTool();
 
-		return $this->updateContact(id: $id, published: -2);
+		/** @var HttpDecorator $http */
+		$http     = Factory::getContainer()->get('http');
+		$uri      = $http->getUri('v1/contacts/' . $id);
+		$response = $http->patch($uri, json_encode(['published' => -2]), ['Content-Type' => 'application/json']);
+
+		$this->handlePossibleJoomlaAPIError($response);
+
+		return $this->getDataFromResponse($response, 'contacts');
 	}
 
 	#[McpTool(

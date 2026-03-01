@@ -674,7 +674,14 @@ class Articles
 	{
 		$this->autologMCPTool();
 
-		return $this->updateArticle(articleId: $id, state: -2);
+		/** @var HttpDecorator $http */
+		$http     = Factory::getContainer()->get('http');
+		$uri      = $http->getUri('v1/content/articles/' . $id);
+		$response = $http->patch($uri, json_encode(['state' => -2]), ['Content-Type' => 'application/json']);
+
+		$this->handlePossibleJoomlaAPIError($response);
+
+		return $this->getDataFromResponse($response, 'articles');
 	}
 
 	#[McpTool(
