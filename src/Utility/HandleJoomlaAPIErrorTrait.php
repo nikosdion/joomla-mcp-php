@@ -38,9 +38,9 @@ trait HandleJoomlaAPIErrorTrait
 		{
 			$error = array_shift($parsedBody->errors);
 
-			if (is_object($error) && isset($error->title) && isset($error->code))
+			if (is_object($error) && isset($error->title))
 			{
-				throw new \RuntimeException($error->title, $error->code);
+				throw new \RuntimeException($error->title, isset($error->code) ? (int) $error->code : $statusCode);
 			}
 		}
 
