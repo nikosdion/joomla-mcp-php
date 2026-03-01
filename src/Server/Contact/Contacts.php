@@ -288,8 +288,23 @@ class Contacts
 	}
 
 	#[McpTool(
+		name: 'contact_trash',
+		description: 'Moves a contact to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashContact(
+		#[Schema(description: 'The ID of the contact to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateContact(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'contact_delete',
-		description: 'Permanently deletes a contact. The contact MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a contact. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteContact(
@@ -298,6 +313,8 @@ class Contacts
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashContact($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

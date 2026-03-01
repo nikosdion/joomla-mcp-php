@@ -252,8 +252,23 @@ class Feeds
 	}
 
 	#[McpTool(
+		name: 'newsfeeds_trash',
+		description: 'Moves a newsfeed to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashFeed(
+		#[Schema(description: 'The ID of the newsfeed to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateFeed(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'newsfeeds_delete',
-		description: 'Permanently deletes a newsfeed. The newsfeed MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a newsfeed. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteFeed(
@@ -262,6 +277,8 @@ class Feeds
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashFeed($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

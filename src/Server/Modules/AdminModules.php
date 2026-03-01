@@ -235,8 +235,23 @@ class AdminModules
 	}
 
 	#[McpTool(
+		name: 'modules_admin_trash',
+		description: 'Moves an administrator module to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashModule(
+		#[Schema(description: 'The ID of the module to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateModule(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'modules_admin_delete',
-		description: 'Permanently deletes an administrator module. The module MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes an administrator module. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteModule(
@@ -245,6 +260,8 @@ class AdminModules
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashModule($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

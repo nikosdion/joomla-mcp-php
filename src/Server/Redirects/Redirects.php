@@ -186,8 +186,23 @@ class Redirects
 	}
 
 	#[McpTool(
+		name: 'redirects_trash',
+		description: 'Moves a redirect to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashRedirect(
+		#[Schema(description: 'The ID of the redirect to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateRedirect(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'redirects_delete',
-		description: 'Permanently deletes a redirect. The redirect MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a redirect. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteRedirect(
@@ -196,6 +211,8 @@ class Redirects
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashRedirect($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

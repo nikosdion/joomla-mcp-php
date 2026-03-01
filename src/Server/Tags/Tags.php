@@ -223,8 +223,23 @@ class Tags
 	}
 
 	#[McpTool(
+		name: 'tags_trash',
+		description: 'Moves a tag to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashTag(
+		#[Schema(description: 'The ID of the tag to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateTag(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'tags_delete',
-		description: 'Permanently deletes a tag. The tag MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a tag. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteTag(
@@ -233,6 +248,8 @@ class Tags
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashTag($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

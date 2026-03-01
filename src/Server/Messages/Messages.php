@@ -131,7 +131,12 @@ class Messages
 		#[Schema(description: 'Message subject', minLength: 1, maxLength: 255)]
 		?string $subject = null,
 		#[Schema(description: 'Message body text', minLength: 1)]
-		?string $message = null
+		?string $message = null,
+		#[Schema(
+			description: 'Message state: null=no change, 0=unread, 1=read, -2=trashed',
+			enum: [null, 0, 1, -2]
+		)]
+		?int $state = null
 	)
 	{
 		$this->autologMCPTool();
@@ -140,6 +145,7 @@ class Messages
 			'user_id_to' => $userIdTo,
 			'subject'    => $subject,
 			'message'    => $message,
+			'state'      => $state,
 		];
 
 		$writableFields = array_keys($postData);
@@ -159,8 +165,23 @@ class Messages
 	}
 
 	#[McpTool(
+		name: 'messages_trash',
+		description: 'Moves a private message to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashMessage(
+		#[Schema(description: 'The ID of the message to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateMessage(id: $id, state: -2);
+	}
+
+	#[McpTool(
 		name: 'messages_delete',
-		description: 'Permanently deletes a private message. The message MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a private message. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteMessage(
@@ -169,6 +190,8 @@ class Messages
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashMessage($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

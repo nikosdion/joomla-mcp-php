@@ -663,13 +663,30 @@ class Articles
 	}
 
 	#[McpTool(
+		name: 'content_articles_trash',
+		description: 'Moves an article to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashArticle(
+		#[Schema(description: 'The ID of the article to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateArticle(articleId: $id, state: -2);
+	}
+
+	#[McpTool(
 		name: 'content_articles_delete',
-		description: 'Permanently deletes an article. The article MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes an article. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteArticle(int $id): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashArticle($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

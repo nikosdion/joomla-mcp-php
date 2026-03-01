@@ -264,8 +264,23 @@ class Banners
 	}
 
 	#[McpTool(
+		name: 'banners_trash',
+		description: 'Moves a banner to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashBanner(
+		#[Schema(description: 'The ID of the banner to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateBanner(id: $id, state: -2);
+	}
+
+	#[McpTool(
 		name: 'banners_delete',
-		description: 'Permanently deletes a banner. The banner MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a banner. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteBanner(
@@ -274,6 +289,8 @@ class Banners
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashBanner($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

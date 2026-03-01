@@ -212,8 +212,23 @@ class Clients
 	}
 
 	#[McpTool(
+		name: 'banners_clients_trash',
+		description: 'Moves a banner client to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashClient(
+		#[Schema(description: 'The ID of the client to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateClient(id: $id, state: -2);
+	}
+
+	#[McpTool(
 		name: 'banners_clients_delete',
-		description: 'Permanently deletes a banner client. The client MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a banner client. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteClient(
@@ -222,6 +237,8 @@ class Clients
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashClient($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

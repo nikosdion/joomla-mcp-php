@@ -235,8 +235,23 @@ class SiteModules
 	}
 
 	#[McpTool(
+		name: 'modules_site_trash',
+		description: 'Moves a site module to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashModule(
+		#[Schema(description: 'The ID of the module to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateModule(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'modules_site_delete',
-		description: 'Permanently deletes a site module. The module MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a site module. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteModule(
@@ -245,6 +260,8 @@ class SiteModules
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashModule($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');

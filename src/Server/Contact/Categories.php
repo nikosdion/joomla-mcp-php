@@ -234,8 +234,23 @@ class Categories
 	}
 
 	#[McpTool(
+		name: 'contact_categories_trash',
+		description: 'Moves a contact category to the trash by setting its state to -2',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function trashCategory(
+		#[Schema(description: 'The ID of the category to trash')]
+		int $id
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->updateCategory(id: $id, published: -2);
+	}
+
+	#[McpTool(
 		name: 'contact_categories_delete',
-		description: 'Permanently deletes a contact category. The category MUST be set to a trashed state (-2) before calling this method.',
+		description: 'Permanently deletes a contact category. Automatically trashes it first if needed.',
 		annotations: new ToolAnnotations(destructiveHint: true)
 	)]
 	public function deleteCategory(
@@ -244,6 +259,8 @@ class Categories
 	): bool
 	{
 		$this->autologMCPTool();
+
+		$this->trashCategory($id);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
