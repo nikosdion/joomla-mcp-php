@@ -47,7 +47,11 @@ class Banners
 		#[Schema(description: 'Filter by category ID')]
 		?int $filterCategory = null,
 		#[Schema(description: 'Filter by client ID')]
-		?int $filterClient = null
+		?int $filterClient = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -74,6 +78,16 @@ class Banners
 		if ($filterClient !== null)
 		{
 			$uri->setVar('filter[client_id]', $filterClient);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

@@ -586,7 +586,11 @@ class Articles
 		#[Schema(description: 'The language code of the returned articles, "*" for articles explicitly assigned to "all languages", or NULL for articles assigned to any language', pattern: '^(\*|[a-z]{2}(-[A-Z]{2})?)$')]
 		?string $filterLanguage = null,
 		#[Schema(description: 'The returned articles must have a title that matches this search string', pattern: '^.*$')]
-		?string $filterSearch = null
+		?string $filterSearch = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -631,6 +635,16 @@ class Articles
 		if ($filterSearch !== null)
 		{
 			$uri->setVar('filter[search]', $filterSearch);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

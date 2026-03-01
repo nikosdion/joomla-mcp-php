@@ -45,7 +45,11 @@ class Redirects
 			description: 'Filter by publish state: 0=unpublished, 1=published, 2=archived, -2=trashed',
 			enum: [null, 0, 1, 2, -2]
 		)]
-		?int $filterState = null
+		?int $filterState = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -62,6 +66,16 @@ class Redirects
 		if ($filterState !== null)
 		{
 			$uri->setVar('filter[published]', $filterState);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

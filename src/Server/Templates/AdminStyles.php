@@ -40,7 +40,11 @@ class AdminStyles
 		#[Schema(description: 'Search administrator template styles by name')]
 		?string $filterSearch = null,
 		#[Schema(description: 'Filter by template name')]
-		?string $filterTemplate = null
+		?string $filterTemplate = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -57,6 +61,16 @@ class AdminStyles
 		if ($filterTemplate !== null)
 		{
 			$uri->setVar('filter[template]', $filterTemplate);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

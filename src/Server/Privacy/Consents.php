@@ -34,7 +34,11 @@ class Consents
 	)]
 	public function listConsents(
 		#[Schema(description: 'Filter by consent state')]
-		?int $filterState = null
+		?int $filterState = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -46,6 +50,16 @@ class Consents
 		if ($filterState !== null)
 		{
 			$uri->setVar('filter[state]', $filterState);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

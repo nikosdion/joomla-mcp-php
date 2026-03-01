@@ -47,7 +47,11 @@ class Categories
 		#[Schema(description: 'Filter by language code, or "*" for all languages')]
 		?string $filterLanguage = null,
 		#[Schema(description: 'Filter by category nesting level')]
-		?int $filterLevel = null
+		?int $filterLevel = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -74,6 +78,16 @@ class Categories
 		if ($filterLevel !== null)
 		{
 			$uri->setVar('filter[level]', $filterLevel);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

@@ -49,7 +49,11 @@ class AdminMenuItems
 		#[Schema(description: 'Filter by menu type identifier')]
 		?string $filterMenutype = null,
 		#[Schema(description: 'Filter by menu item nesting level')]
-		?int $filterLevel = null
+		?int $filterLevel = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -81,6 +85,16 @@ class AdminMenuItems
 		if ($filterLevel !== null)
 		{
 			$uri->setVar('filter[level]', $filterLevel);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

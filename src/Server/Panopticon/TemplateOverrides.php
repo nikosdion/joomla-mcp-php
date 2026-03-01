@@ -29,13 +29,29 @@ class TemplateOverrides
 		description: 'List changed template overrides',
 		annotations: new ToolAnnotations(readOnlyHint: true)
 	)]
-	public function listOverrides()
+	public function listOverrides(
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
+	)
 	{
 		$this->autologMCPTool();
 
 		/** @var HttpDecorator $http */
-		$http     = Factory::getContainer()->get('http');
-		$uri      = $http->getUri('v1/panopticon/template/overrides/changed');
+		$http = Factory::getContainer()->get('http');
+		$uri  = $http->getUri('v1/panopticon/template/overrides/changed');
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
+		}
+
 		$response = $http->get($uri);
 
 		$this->handlePossibleJoomlaAPIError($response);

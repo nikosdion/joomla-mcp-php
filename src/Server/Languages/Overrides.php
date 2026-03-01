@@ -42,7 +42,11 @@ class Overrides
 		#[Schema(description: 'The language code, e.g. "en-GB"')]
 		string $language,
 		#[Schema(description: 'Search overrides by key or value')]
-		?string $filterSearch = null
+		?string $filterSearch = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -54,6 +58,16 @@ class Overrides
 		if ($filterSearch !== null)
 		{
 			$uri->setVar('filter[search]', $filterSearch);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());
@@ -187,7 +201,11 @@ class Overrides
 		#[Schema(description: 'The language code, e.g. "en-GB"')]
 		string $language,
 		#[Schema(description: 'Search overrides by key or value')]
-		?string $filterSearch = null
+		?string $filterSearch = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -199,6 +217,16 @@ class Overrides
 		if ($filterSearch !== null)
 		{
 			$uri->setVar('filter[search]', $filterSearch);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

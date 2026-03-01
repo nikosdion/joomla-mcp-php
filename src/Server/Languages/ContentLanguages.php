@@ -36,7 +36,11 @@ class ContentLanguages
 	)]
 	public function listLanguages(
 		#[Schema(description: 'Filter by published state', enum: [0, 1])]
-		?int $filterState = null
+		?int $filterState = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -48,6 +52,16 @@ class ContentLanguages
 		if ($filterState !== null)
 		{
 			$uri->setVar('filter[published]', $filterState);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

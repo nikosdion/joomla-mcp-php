@@ -36,7 +36,11 @@ class Groups
 	)]
 	public function listGroups(
 		#[Schema(description: 'Search user groups by title')]
-		?string $filterSearch = null
+		?string $filterSearch = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -48,6 +52,16 @@ class Groups
 		if ($filterSearch !== null)
 		{
 			$uri->setVar('filter[search]', $filterSearch);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

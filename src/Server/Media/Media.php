@@ -79,7 +79,11 @@ class Media
 		#[Schema(description: 'Subdirectory path to filter by')]
 		?string $path = null,
 		#[Schema(description: 'Media adapter to filter by')]
-		?string $adapter = null
+		?string $adapter = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -96,6 +100,16 @@ class Media
 		if ($adapter !== null)
 		{
 			$uri->setVar('adapter', $adapter);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

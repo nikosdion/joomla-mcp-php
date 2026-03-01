@@ -44,7 +44,11 @@ class Plugins
 		#[Schema(description: 'Filter by plugin group (folder)')]
 		?string $filterFolder = null,
 		#[Schema(description: 'Filter by plugin element name')]
-		?string $filterElement = null
+		?string $filterElement = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
@@ -71,6 +75,16 @@ class Plugins
 		if ($filterElement !== null)
 		{
 			$uri->setVar('filter[element]', $filterElement);
+		}
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
 		}
 
 		$response = $http->get($uri->toString());

@@ -36,14 +36,29 @@ class ContentHistory
 		#[Schema(description: 'The resource type, e.g. "content/articles"')]
 		string $resource,
 		#[Schema(description: 'The ID of the item to retrieve history for')]
-		int $itemId
+		int $itemId,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
 	)
 	{
 		$this->autologMCPTool();
 
 		/** @var HttpDecorator $http */
-		$http     = Factory::getContainer()->get('http');
-		$uri      = $http->getUri('v1/' . $resource . '/' . $itemId . '/contenthistory');
+		$http = Factory::getContainer()->get('http');
+		$uri  = $http->getUri('v1/' . $resource . '/' . $itemId . '/contenthistory');
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			$uri->setVar('page[offset]', $pageOffset);
+		}
+
 		$response = $http->get($uri);
 
 		$this->handlePossibleJoomlaAPIError($response);
