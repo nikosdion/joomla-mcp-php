@@ -32,13 +32,29 @@ class Packages
 		description: 'List available language packages',
 		annotations: new ToolAnnotations(readOnlyHint: true)
 	)]
-	public function listPackages()
+	public function listPackages(
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
+	)
 	{
 		$this->autologMCPTool();
 
 		/** @var HttpDecorator $http */
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/languages');
+
+		if ($pageLimit !== null)
+		{
+			$uri->setVar('page[limit]', $pageLimit);
+		}
+
+		if ($pageOffset !== null)
+		{
+			// This endpoint uses page[start] rather than the standard page[offset].
+			$uri->setVar('page[start]', $pageOffset);
+		}
 
 		$response = $http->get($uri);
 

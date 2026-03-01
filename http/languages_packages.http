@@ -3,6 +3,11 @@ GET {{baseUrl}}/api/index.php/v1/languages
 Authorization: Bearer {{token}}
 Accept: application/vnd.api+json
 
+### List page 2 of available language packages
+GET {{baseUrl}}/api/index.php/v1/languages?page[limit]=20&page[start]=20
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
 ### Install a language package
 POST {{baseUrl}}/api/index.php/v1/languages
 Authorization: Bearer {{token}}
