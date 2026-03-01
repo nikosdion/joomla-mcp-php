@@ -152,11 +152,21 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 							}
 						}
 
+						// For integer types, also accept numeric strings. Some MCP clients
+						// (e.g. LLMs) send integers as JSON strings ("20" instead of 20).
+						// The library's castToInt() will coerce the string to int after
+						// schema validation passes.
+						$anyOfBranches = [$mainSchema];
+
+						if ($nonNullTypes[0] === 'integer')
+						{
+							$anyOfBranches[] = ['type' => 'string', 'pattern' => '^-?[0-9]+$'];
+						}
+
+						$anyOfBranches[] = ['type' => 'null'];
+
 						$newPval = [
-							'anyOf' => [
-								$mainSchema,
-								['type' => 'null'],
-							],
+							'anyOf' => $anyOfBranches,
 						];
 
 						// Preserve default and description at the top level.
