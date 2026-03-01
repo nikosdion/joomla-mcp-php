@@ -164,8 +164,8 @@ class Clients
 		#[Schema(description: 'Extra information about the client')]
 		?string $extraInfo = null,
 		#[Schema(
-			description: 'Publish state: null=no change, 0=unpublished, 1=published',
-			enum: [null, 0, 1]
+			description: 'Publish state: null=no change, 0=unpublished, 1=published, -2=trashed',
+			enum: [null, 0, 1, -2]
 		)]
 		?int $state = null,
 		#[Schema(description: 'Purchase type')]

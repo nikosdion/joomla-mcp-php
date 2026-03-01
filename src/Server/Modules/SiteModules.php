@@ -183,8 +183,8 @@ class SiteModules
 		#[Schema(description: 'Module type (e.g. mod_menu)', minLength: 1)]
 		?string $module = null,
 		#[Schema(
-			description: 'Publish state: null=no change, 0=unpublished, 1=published',
-			enum: [null, 0, 1]
+			description: 'Publish state: null=no change, 0=unpublished, 1=published, -2=trashed',
+			enum: [null, 0, 1, -2]
 		)]
 		?int $published = null,
 		#[Schema(description: 'The Joomla! viewing access level for the module')]

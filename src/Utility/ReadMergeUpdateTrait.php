@@ -42,7 +42,7 @@ trait ReadMergeUpdateTrait
 			$baselinePayload[$field] = $currentAttributes[$field] ?? null;
 		}
 
-		return array_replace($baselinePayload, $incomingData);
+		return array_filter(array_replace($baselinePayload, $incomingData), fn($v) => $v !== null);
 	}
 
 	/**
