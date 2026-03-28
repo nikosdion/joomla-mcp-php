@@ -7,7 +7,7 @@
 
 namespace Dionysopoulos\Mcp4Joomla\Container;
 
-use DouglasGreen\OptParser\OptResult;
+use Dionysopoulos\Mcp4Joomla\Cli\CliInput;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
@@ -22,7 +22,7 @@ class LogProvider implements ServiceProviderInterface
 	public function register(Container $pimple)
 	{
 		$pimple['log'] = function (Container $c) {
-			/** @var OptResult $input */
+			/** @var CliInput $input */
 			$input = $c['input'];
 
 			if (\Phar::running() !== '')

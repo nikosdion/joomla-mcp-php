@@ -342,7 +342,7 @@ try
 		$log->debug("  $key = $value");
 	}
 
-	/** @var \DouglasGreen\OptParser\OptResult $input */
+	/** @var \Dionysopoulos\Mcp4Joomla\Cli\CliInput $input */
 	$input = $container->get('input');
 
 	// Determine scan directories based on --categories and --no-panopticon flags.

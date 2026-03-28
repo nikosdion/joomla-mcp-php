@@ -15,7 +15,7 @@ class OptionsParserProvider implements ServiceProviderInterface
 	public function register(Container $pimple)
 	{
 		$pimple['optionsParser'] = function (Container $c) {
-			$optParser = new \DouglasGreen\OptParser\OptParser(
+			$optParser = new \Dionysopoulos\Mcp4Joomla\Cli\CliParser(
 				'MCP4Joomla',
 				'An MCP server for Joomla 5 and later, written in PHP.'
 			);
