@@ -149,7 +149,7 @@ class AttachmentsTest extends TestCase
 		// Build a minimal valid ZIP in memory
 		$zip     = new \ZipArchive();
 		$tmpFile = tempnam(sys_get_temp_dir(), 'test_zip_');
-		$zip->open($tmpFile, \ZipArchive::CREATE);
+		$zip->open($tmpFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 		$zip->addFromString('readme.txt', 'Hello from inside the ZIP');
 		$zip->close();
 
@@ -174,7 +174,7 @@ class AttachmentsTest extends TestCase
 	{
 		$zip     = new \ZipArchive();
 		$tmpFile = tempnam(sys_get_temp_dir(), 'test_zip2_');
-		$zip->open($tmpFile, \ZipArchive::CREATE);
+		$zip->open($tmpFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 		$zip->addFromString('screenshot.png', "\x89PNG\r\n\x1a\n"); // fake PNG
 		$zip->addFromString('config.php', "<?php\ndefine('DEBUG', true);\n");
 		$zip->close();

@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\JoomlaUpdate;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -39,7 +41,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/healthcheck');
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -58,7 +60,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/update');
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -76,7 +78,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/update/prepare');
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -94,7 +96,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/update/finalize');
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -112,7 +114,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/update/notify/success');
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -130,7 +132,7 @@ class JoomlaUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/joomlaupdate/update/notify/failed');
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

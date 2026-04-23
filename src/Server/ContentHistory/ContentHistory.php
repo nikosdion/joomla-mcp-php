@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\ContentHistory;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -59,7 +61,7 @@ class ContentHistory
 			$uri->setVar('page[offset]', $pageOffset);
 		}
 
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -85,7 +87,7 @@ class ContentHistory
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/' . $resource . '/' . $itemId . '/contenthistory/' . $versionId . '/keep');
-		$response = $http->patch($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -111,7 +113,7 @@ class ContentHistory
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/' . $resource . '/' . $itemId . '/contenthistory/' . $versionId);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

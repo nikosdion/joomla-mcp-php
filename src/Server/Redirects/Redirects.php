@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Redirects;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -100,7 +102,7 @@ class Redirects
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/redirects/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -143,7 +145,7 @@ class Redirects
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/redirects');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -192,7 +194,7 @@ class Redirects
 
 		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'redirects', $postData, $writableFields);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -214,7 +216,7 @@ class Redirects
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/redirects/' . $id);
-		$response = $http->patch($uri, json_encode(['published' => -2]), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode(['published' => -2]), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -238,7 +240,7 @@ class Redirects
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/redirects/' . $id);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

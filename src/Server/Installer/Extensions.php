@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Installer;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;

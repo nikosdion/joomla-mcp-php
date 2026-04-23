@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Panopticon;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -52,7 +54,7 @@ class TemplateOverrides
 			$uri->setVar('page[offset]', $pageOffset);
 		}
 
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -74,7 +76,7 @@ class TemplateOverrides
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/panopticon/template/overrides/changed/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

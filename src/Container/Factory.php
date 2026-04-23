@@ -5,6 +5,8 @@
  * @license   AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Container;
 
 use Pimple\Psr11\Container as Psr11Container;

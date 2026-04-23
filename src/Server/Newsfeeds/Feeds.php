@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Newsfeeds;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -112,7 +114,7 @@ class Feeds
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/newsfeeds/feeds/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -182,7 +184,7 @@ class Feeds
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/newsfeeds/feeds');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -258,7 +260,7 @@ class Feeds
 
 		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'newsfeeds', $postData, $writableFields);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -280,7 +282,7 @@ class Feeds
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/newsfeeds/feeds/' . $id);
-		$response = $http->patch($uri, json_encode(['published' => -2]), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode(['published' => -2]), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -304,7 +306,7 @@ class Feeds
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/newsfeeds/feeds/' . $id);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

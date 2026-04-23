@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Privacy;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -84,7 +86,7 @@ class Requests
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/privacy/requests/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -106,7 +108,7 @@ class Requests
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/privacy/requests/export/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -137,7 +139,7 @@ class Requests
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/privacy/requests');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

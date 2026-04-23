@@ -403,6 +403,13 @@ class ArticlesTest extends TestCase
 
 	public function testDeleteArticleReturnsTrue(): void
 	{
+		$trashBody = json_encode(['data' => ['type' => 'articles', 'id' => '42', 'attributes' => ['state' => -2]]]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->willReturn(createJoomlaResponse(200, $trashBody));
+
 		$this->mockHttp
 			->expects($this->once())
 			->method('delete')
@@ -418,6 +425,13 @@ class ArticlesTest extends TestCase
 
 	public function testDeleteArticleReturnsFalseOnNon204(): void
 	{
+		$trashBody = json_encode(['data' => ['type' => 'articles', 'id' => '42', 'attributes' => ['state' => -2]]]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->willReturn(createJoomlaResponse(200, $trashBody));
+
 		$this->mockHttp
 			->expects($this->once())
 			->method('delete')

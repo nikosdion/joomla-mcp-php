@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Panopticon;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -36,7 +38,7 @@ class Updates
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/updates/refresh');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -64,7 +66,7 @@ class Updates
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/updates/apply');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

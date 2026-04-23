@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Utility;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -393,13 +395,13 @@ final class HttpDecorator implements ClientInterface
 	 * Logs the details of a given response, including the status code, reason phrase, headers, and body,
 	 * if response logging is enabled.
 	 *
-	 * @param   Response  $response  The response object to log.
+	 * @param   Response|null  $response  The response object to log.
 	 *
 	 * @return  void  This method does not return a value.
 	 */
-	private function logResponse(Response $response): void
+	private function logResponse(?Response $response): void
 	{
-		if (!$this->logResponses)
+		if (!$this->logResponses || $response === null)
 		{
 			return;
 		}

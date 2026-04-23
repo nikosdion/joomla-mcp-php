@@ -5,6 +5,8 @@
  * @license   AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Utility;
 
 use Joomla\Http\Response;
@@ -22,7 +24,7 @@ trait HandleJoomlaAPIErrorTrait
 		}
 
 		// Try to parse the response body as JSON.
-		$body = $response->getBody();
+		$body = (string) $response->getBody();
 
 		try
 		{

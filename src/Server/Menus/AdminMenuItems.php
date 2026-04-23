@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Menus;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -119,7 +121,7 @@ class AdminMenuItems
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/menus/administrator/items/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -189,7 +191,7 @@ class AdminMenuItems
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/menus/administrator/items');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -265,7 +267,7 @@ class AdminMenuItems
 
 		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'menuitems', $postData, $writableFields);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -287,7 +289,7 @@ class AdminMenuItems
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/menus/administrator/items/' . $id);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -306,7 +308,7 @@ class AdminMenuItems
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/menus/administrator/items/types');
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

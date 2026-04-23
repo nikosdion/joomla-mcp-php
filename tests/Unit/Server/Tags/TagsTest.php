@@ -191,6 +191,13 @@ class TagsTest extends TestCase
 
 	public function testDeleteTagReturnsTrue(): void
 	{
+		$trashBody = json_encode(['data' => ['type' => 'tags', 'id' => '5', 'attributes' => ['published' => -2]]]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->willReturn(createJoomlaResponse(200, $trashBody));
+
 		$this->mockHttp
 			->expects($this->once())
 			->method('delete')
@@ -206,6 +213,13 @@ class TagsTest extends TestCase
 
 	public function testDeleteTagReturnsFalseOnNon204(): void
 	{
+		$trashBody = json_encode(['data' => ['type' => 'tags', 'id' => '5', 'attributes' => ['published' => -2]]]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->willReturn(createJoomlaResponse(200, $trashBody));
+
 		$this->mockHttp
 			->expects($this->once())
 			->method('delete')

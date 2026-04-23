@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Languages;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -56,7 +58,7 @@ class Packages
 			$uri->setVar('page[start]', $pageOffset);
 		}
 
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -80,7 +82,7 @@ class Packages
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/languages');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Config;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -43,7 +45,7 @@ class Config
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/config/application');
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -70,7 +72,7 @@ class Config
 
 		$postData = $this->prepareReadMergeUpdatePayloadRecursive($http, (string) $uri, 'application', $postData);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -92,7 +94,7 @@ class Config
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/config/' . $componentName);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -121,7 +123,7 @@ class Config
 
 		$postData = $this->prepareReadMergeUpdatePayloadRecursive($http, (string) $uri, 'component', $postData);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

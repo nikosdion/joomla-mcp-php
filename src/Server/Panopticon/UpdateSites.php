@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Panopticon;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -81,7 +83,7 @@ class UpdateSites
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/panopticon/updatesites/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -121,7 +123,7 @@ class UpdateSites
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/updatesites/' . $id);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -143,7 +145,7 @@ class UpdateSites
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/panopticon/updatesites/' . $id);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -162,7 +164,7 @@ class UpdateSites
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/updatesites/rebuild');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 

@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Content;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -220,7 +222,7 @@ class Articles
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/content/articles');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -435,7 +437,7 @@ class Articles
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/content/articles/' . $articleId);
 
-		$currentResponse = $http->get($uri);
+		$currentResponse = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($currentResponse);
 
@@ -469,7 +471,7 @@ class Articles
 
 		$postData = array_replace($postData, $incomingData);
 
-		$response = $http->patch($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -669,7 +671,7 @@ class Articles
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/content/articles/' . $id);
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -691,7 +693,7 @@ class Articles
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/content/articles/' . $id);
-		$response = $http->patch($uri, json_encode(['state' => -2]), ['Content-Type' => 'application/json']);
+		$response = $http->patch($uri->toString(), json_encode(['state' => -2]), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -712,7 +714,7 @@ class Articles
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/content/articles/' . $id);
-		$response = $http->delete($uri);
+		$response = $http->delete($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 

@@ -5,6 +5,8 @@
  * @license       AGPL-3.0-or-later
  */
 
+declare(strict_types=1);
+
 namespace Dionysopoulos\Mcp4Joomla\Server\Panopticon;
 
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
@@ -36,7 +38,7 @@ class CoreUpdate
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
 		$uri      = $http->getUri('v1/panopticon/core/update');
-		$response = $http->get($uri);
+		$response = $http->get($uri->toString());
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -62,7 +64,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/source');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -81,7 +83,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/download');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -112,7 +114,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/download/chunked');
 
-		$response = $http->post($uri, json_encode($postData), ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -131,7 +133,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/activate');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -150,7 +152,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/disable');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -169,7 +171,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/postupdate');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -188,7 +190,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/checksum/prepare');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
@@ -207,7 +209,7 @@ class CoreUpdate
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/panopticon/core/update/checksum/step');
 
-		$response = $http->post($uri, '', ['Content-Type' => 'application/json']);
+		$response = $http->post($uri->toString(), '', ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
