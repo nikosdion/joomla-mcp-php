@@ -355,6 +355,7 @@ try
 
 	$categoriesParam = $input->categories;
 	$noPanopticon    = $input->noPanopticon;
+	$noAts           = $input->noAts;
 
 	if ($categoriesParam !== null)
 	{
@@ -415,6 +416,31 @@ try
 		}
 	}
 
+	if ($noAts)
+	{
+		if ($scanDirs === ['src/Server'])
+		{
+			// Expand to all individual dirs minus Tickets.
+			$scanDirs = [];
+
+			foreach ($allCatDirs as $dir)
+			{
+				if (strtolower($dir) !== 'tickets')
+				{
+					$scanDirs[] = "src/Server/$dir";
+				}
+			}
+		}
+		else
+		{
+			// Remove Tickets from the list (case-insensitive).
+			$scanDirs = array_values(array_filter(
+				$scanDirs,
+				fn($d) => strtolower(basename($d)) !== 'tickets'
+			));
+		}
+	}
+
 	$server = Server::make()
 		->withServerInfo('MCP4Joomla Server', MCP4JOOMLA_VERSION)
 		->withInstructions(<<<'INSTRUCTIONS'
@@ -436,6 +462,7 @@ Tool categories and when to search for them:
 - Modules: site and administrator modules (modules_site_*, modules_admin_*). Use for managing sidebar widgets, footers, and other module positions.
 - Newsfeeds: newsfeeds and newsfeed categories (newsfeeds_*, newsfeeds_categories_*). Use for managing RSS/Atom feed aggregation.
 - Panopticon: Panopticon Connector tools for remote site management (panopticon_*). Use for extension updates, backups, security scans, and update site management via Akeeba Panopticon.
+- Tickets: Akeeba Ticket System support tickets, posts, attachments, and manager notes (tickets_*). Use for managing ATS support tickets, reading ticket conversations, and inspecting attachments. Attachment and manager-note tools require ATS Pro.
 - Plugins: Joomla plugins (plugins_*). Use for listing, reading, or updating plugin settings and state.
 - Privacy: privacy requests and consents (privacy_requests_*, privacy_consents_*). Use for GDPR privacy management.
 - Redirects: URL redirects (redirects_*). Use for managing 301/302 URL redirects.

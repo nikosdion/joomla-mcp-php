@@ -1,0 +1,247 @@
+### Akeeba Ticket System — REST API (Joomla API application)
+###
+### Variables — configure in http-client.env.json or override here:
+###   baseUrl  : root URL of the Joomla API application, e.g. https://example.com/api
+###   token    : Joomla API Bearer token (base64-encoded sha256:uid:secret)
+###   catId    : ATS category ID to use when creating tickets
+###   ticketId : ID of an existing ticket (fill in after creation)
+###   postId   : ID of an existing post  (fill in after creation)
+###   attId    : ID of an existing attachment (fill in after creation)
+###   noteId   : ID of an existing manager note (fill in after creation)
+###
+### All endpoints require an ATS manager account.
+### Attachment and manager-note endpoints require ATS Pro.
+
+# ============================================================
+# CATEGORIES  (delegated to com_categories)
+# ============================================================
+
+### T1 — List ATS categories
+GET {{baseUrl}}/index.php/v1/ats/categories
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+### T2 — Show a single category
+GET {{baseUrl}}/index.php/v1/ats/categories/{{catId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+# ============================================================
+# TICKETS
+# ============================================================
+
+### T3 — Create a ticket
+# Note: content_html is the opening post body; priority is required when
+# the "Ticket priorities" component option is enabled.
+POST {{baseUrl}}/index.php/v1/ats/tickets
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+  "catid": {{catId}},
+  "title": "Test ticket from PhpStorm HTTP client",
+  "content_html": "<p>Opening message for the ticket.</p>",
+  "priority": 10,
+  "public": 0
+}
+
+###
+
+### T4 — List all tickets
+GET {{baseUrl}}/index.php/v1/ats/tickets
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T5 — Show a single ticket
+GET {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T6 — Update a ticket (change title and/or status)
+PATCH {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+  "title": "Updated ticket title",
+  "status": "O"
+}
+
+###
+
+### T7 — Show ticket with embedded posts
+GET {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}?include=posts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T24 — Delete a ticket
+DELETE {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+# ============================================================
+# POSTS
+# ============================================================
+
+### T8 — Create a post (reply) under a ticket — nested route
+POST {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}/posts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+  "ticket_id": {{ticketId}},
+  "content_html": "<p>Reply text for the ticket.</p>"
+}
+
+###
+
+### T9 — List posts for a ticket — nested route
+GET {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}/posts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T10 — Show a single post
+GET {{baseUrl}}/index.php/v1/ats/posts/{{postId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T11 — Update a post
+PATCH {{baseUrl}}/index.php/v1/ats/posts/{{postId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+  "content_html": "<p>Updated reply text.</p>"
+}
+
+###
+
+### T12 — List all posts (standalone)
+GET {{baseUrl}}/index.php/v1/ats/posts
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T23 — Delete a post
+DELETE {{baseUrl}}/index.php/v1/ats/posts/{{postId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+# ============================================================
+# ATTACHMENTS  (Pro only)
+# ============================================================
+
+### T13 — Upload an attachment to a post (multipart/form-data)
+# PhpStorm sends the file via a multipart body; adjust the filename path
+# to point at a real local file before running.
+POST {{baseUrl}}/index.php/v1/ats/posts/{{postId}}/attachments
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="post_id"
+
+{{postId}}
+--WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+This is a test attachment for ATS API testing.
+--WebKitFormBoundary--
+
+###
+
+### T14 — Show a single attachment (includes file_size)
+GET {{baseUrl}}/index.php/v1/ats/attachments/{{attId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T15 — Download attachment as a binary file
+# The response is the raw file bytes with a Content-Disposition: attachment header.
+GET {{baseUrl}}/index.php/v1/ats/attachments/{{attId}}/download
+Authorization: Bearer {{token}}
+
+###
+
+### T16 — List all attachments (standalone)
+GET {{baseUrl}}/index.php/v1/ats/attachments
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T17 — List attachments for a specific post (nested route)
+GET {{baseUrl}}/index.php/v1/ats/posts/{{postId}}/attachments
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T21 — Delete an attachment
+DELETE {{baseUrl}}/index.php/v1/ats/attachments/{{attId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+# ============================================================
+# MANAGER NOTES  (Pro only)
+# ============================================================
+
+### T18 — Create a manager note under a ticket — nested route
+POST {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}/notes
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+Content-Type: application/json
+
+{
+  "ticket_id": {{ticketId}},
+  "note_html": "<p>Internal manager note.</p>"
+}
+
+###
+
+### T19 — List manager notes for a ticket — nested route
+GET {{baseUrl}}/index.php/v1/ats/tickets/{{ticketId}}/notes
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T20 — Show a single manager note
+GET {{baseUrl}}/index.php/v1/ats/notes/{{noteId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
+
+### T22 — Delete a manager note
+DELETE {{baseUrl}}/index.php/v1/ats/notes/{{noteId}}
+Authorization: Bearer {{token}}
+Accept: application/vnd.api+json
+
+###
