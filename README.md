@@ -52,7 +52,7 @@ Where:
 You can add MCP4Joomla to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) using the `claude mcp add` command.
 
 > [!IMPORTANT]
-> MCP4Joomla provides 212 tools across 21 categories. Claude Code cannot handle this many tools reliably — it will only see a subset of them. **You should always use `--categories` to limit the server to only the categories you need for your session.** Use `php mcp4joomla.php list-tools` to see available categories.
+> MCP4Joomla provides 249 tools across 22 categories. Claude Code cannot handle this many tools reliably — it will only see a subset of them. **You should always use `--categories` to limit the server to only the categories you need for your session.** Use `php mcp4joomla.php list-tools` to see available categories.
 
 For example, to work with content articles and contacts:
 
@@ -97,12 +97,13 @@ The `server` command accepts the following optional arguments:
 | `--debug` / `-d` | Enable debug mode (verbose logging of all parameters and API requests/responses). |
 | `--log=PATH` / `-l PATH` | Specify a custom log file path. |
 | `--no-panopticon` | Exclude all Panopticon tools. Use this if your Joomla site does not have the Panopticon Connector component installed. |
+| `--no-ats` | Exclude all ATS (Akeeba Ticket System) tools. Use this if your site does not have Akeeba Ticket System installed. |
 | `--no-schema` | Strip `#[Schema]` descriptions and constraints from tool input schemas, keeping only parameter types and defaults. Reduces context size for LLMs with limited context windows. |
 | `--categories=LIST` / `-c LIST` | Comma-separated list of category names to include (case-insensitive). Only tools from these categories will be exposed. |
 | `--tools=LIST` / `-t LIST` | Comma-separated list of tool names to include. Only these exact tools will be exposed. |
 | `--non-destructive` / `-r` | Only expose read-only tools (no create, update, or delete). |
 
-**Precedence:** `--non-destructive` is applied last, after all other filters. `--tools` overrides `--categories`, which overrides `--no-panopticon`. If `--tools` is given, only those exact tools are exposed. If `--categories` is given, only tools from those categories are discovered. `--no-panopticon` excludes the Panopticon category from discovery.
+**Precedence:** `--non-destructive` is applied last, after all other filters. `--tools` overrides `--categories`, which overrides `--no-panopticon` and `--no-ats`. If `--tools` is given, only those exact tools are exposed. If `--categories` is given, only tools from those categories are discovered. `--no-panopticon` excludes the Panopticon category and `--no-ats` excludes the Tickets category from discovery.
 
 For example, to start the server with only the Content and Tags categories and debug logging:
 
@@ -141,11 +142,12 @@ This command does not require the `JOOMLA_BASE_URL` or `BEARER_TOKEN` environmen
 > [!IMPORTANT]
 > If you are using LM Studio you **MUST** set the **Context Overflow** to a "Rolling Window" instead of "Truncate Middle". Failure to do so will result in the LLM going into an infinite loop calling the same MCP tool over and over.
 
-The MCP server provides 212 tools across 21 categories. The JSON schema for these tools is quite large. LLMs with small context windows may not be able to use all tools, or may fail as their context is overrun. You can reduce context usage in several ways:
+The MCP server provides 249 tools across 22 categories. The JSON schema for these tools is quite large. LLMs with small context windows may not be able to use all tools, or may fail as their context is overrun. You can reduce context usage in several ways:
 
 * **`--categories`** — Only expose the categories you need (e.g. `--categories=Content,Tags`).
 * **`--tools`** — Only expose specific tools by name (e.g. `--tools=content_articles_list,tags_list`).
 * **`--no-panopticon`** — Exclude all Panopticon tools if your site doesn't use the Panopticon Connector.
+* **`--no-ats`** — Exclude all ATS (Akeeba Ticket System) tools if your site doesn't use ATS.
 * **`--non-destructive`** — Only expose read-only tools, preventing any data modification. Useful as a safety measure.
 * **`--no-schema`** — Strip parameter descriptions and constraints from the tool schemas, significantly reducing context size.
 

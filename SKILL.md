@@ -4,7 +4,7 @@ This file documents the MCP4Joomla MCP server for use by agentic AI systems.
 
 ## What is MCP4Joomla?
 
-MCP4Joomla is a Model Context Protocol (MCP) server that provides comprehensive programmatic access to Joomla 5+ installations via the Joomla Web Services API. It exposes 100+ tools for managing all aspects of a Joomla site, from content creation to extension management.
+MCP4Joomla is a Model Context Protocol (MCP) server that provides comprehensive programmatic access to Joomla 5+ installations via the Joomla Web Services API. It exposes 249 tools across 22 categories for managing all aspects of a Joomla site, from content creation to extension management.
 
 ## When to Use This MCP Server
 
@@ -20,6 +20,7 @@ Use MCP4Joomla when you need to:
 - Configure language settings and translations
 - Manage tags, custom fields, banners, newsfeeds, and redirects
 - Integrate with Panopticon for site monitoring and backups
+- Manage Akeeba Ticket System (ATS) support tickets, replies, and attachments
 
 **When NOT to use this**: For content research, web scraping, or accessing public Joomla content (use standard HTTP requests instead). This server requires authenticated API access to a Joomla backend.
 
@@ -109,6 +110,16 @@ MCP4Joomla auto-discovers tools from PHP classes with `#[McpTool]` attributes. T
 - `content_history_*` — Content versioning and history
 - `redirects_*` — URL redirect management
 - `languages_*` — Language packages and overrides
+
+### Support (Akeeba Ticket System)
+
+> Requires the [Akeeba Ticket System](https://www.akeeba.com/products/akeeba-ticket-system.html) (ATS) Joomla extension. Attachment download and manager notes require **ATS Pro**.
+
+- `tickets_categories_*` — List and read ATS ticket categories
+- `tickets_tickets_*` — Full CRUD for support tickets (list, read, create, update, delete); `tickets_tickets_read` accepts `includePosts: true` to embed the conversation in one call
+- `tickets_posts_*` — Read and manage ticket replies (posts); create a reply with `tickets_posts_create`
+- `tickets_attachments_*` — List, read metadata, and download attachments; download returns images as `ImageContent` (ready for vision models), text/code files as `TextContent`, and ZIP archives expanded into individual file contents
+- `tickets_notes_*` — Manager-only internal notes on tickets (ATS Pro)
 
 ### Other Components
 - `contact_*` — Contact management
@@ -226,6 +237,26 @@ const result = await use_mcp_tool({
 });
 ```
 
+### Read an ATS Support Ticket with Its Conversation
+
+```javascript
+// Read ticket 42 including all reply posts in a single call
+const ticket = await use_mcp_tool({
+  server_name: "mcp4joomla",
+  tool_name: "tickets_tickets_read",
+  arguments: { id: 42, includePosts: true }
+});
+
+// Download an attachment and let a vision model inspect it
+const image = await use_mcp_tool({
+  server_name: "mcp4joomla",
+  tool_name: "tickets_attachments_download",
+  arguments: { id: 7 }
+  // Returns ImageContent for images, TextContent for text/code,
+  // or an array of Content objects when the attachment is a ZIP
+});
+```
+
 ### Manage User Access
 
 ```javascript
@@ -281,6 +312,8 @@ Common errors:
 - **No transaction support** — Operations are not atomic
 - **Media upload limits** — Respects Joomla's PHP upload_max_filesize
 - **Rate limiting** — Subject to web server and PHP-FPM limits
+- **ATS requires separate extension** — `tickets_*` tools only work if Akeeba Ticket System is installed; use `--no-ats` to exclude them if not applicable
+- **ATS attachment upload not supported** — Multipart file upload is impractical for AI agents; use the Joomla backend to upload attachments
 
 ## Troubleshooting
 
