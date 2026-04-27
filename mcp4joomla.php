@@ -73,8 +73,7 @@ function fixToolSchemas(\PhpMcp\Server\Server $server): void
 {
 	$registry = $server->getRegistry();
 	$ref      = new \ReflectionClass($registry);
-	$prop     = $ref->getProperty('tools');
-	$prop->setAccessible(true);
+	$prop  = $ref->getProperty('tools');
 	$tools = $prop->getValue($registry);
 
 	$fixed = [];
@@ -540,9 +539,8 @@ INSTRUCTIONS
 	{
 		$registry = $server->getRegistry();
 		$ref      = new \ReflectionClass($registry);
-		$prop     = $ref->getProperty('tools');
-		$prop->setAccessible(true);
-		$tools    = $prop->getValue($registry);
+		$prop  = $ref->getProperty('tools');
+		$tools = $prop->getValue($registry);
 		$filtered = array_filter(
 			$tools,
 			fn($registeredTool) => $registeredTool->schema->annotations?->readOnlyHint === true
