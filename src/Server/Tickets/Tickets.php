@@ -113,7 +113,15 @@ class Tickets
 		#[Schema(description: 'The priority level of the ticket (when ticket priorities are enabled)')]
 		?int $priority = null,
 		#[Schema(description: 'Whether the ticket is publicly visible (0 = private, 1 = public)', enum: [0, 1])]
-		?int $public = null
+		?int $public = null,
+		#[Schema(description: 'When the ticket was originally created', format: 'date-time')]
+		?string $created = null,
+		#[Schema(description: 'The ID of the Joomla user who originally created the ticket')]
+		?int $created_by = null,
+		#[Schema(description: 'When the ticket was last modified', format: 'date-time')]
+		?string $modified = null,
+		#[Schema(description: 'The ID of the Joomla user who last modified the ticket')]
+		?int $modified_by = null
 	)
 	{
 		$this->autologMCPTool();
@@ -124,6 +132,10 @@ class Tickets
 			'content_html' => $content_html,
 			'priority'     => $priority,
 			'public'       => $public,
+			'created'      => $created,
+			'created_by'   => $created_by,
+			'modified'     => $modified,
+			'modified_by'  => $modified_by,
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -149,14 +161,26 @@ class Tickets
 		#[Schema(description: 'The new subject/title of the ticket')]
 		?string $title = null,
 		#[Schema(description: 'The new status of the ticket', enum: ['O', 'P', 'C'])]
-		?string $status = null
+		?string $status = null,
+		#[Schema(description: 'When the ticket was originally created', format: 'date-time')]
+		?string $created = null,
+		#[Schema(description: 'The ID of the Joomla user who originally created the ticket')]
+		?int $created_by = null,
+		#[Schema(description: 'When the ticket was last modified', format: 'date-time')]
+		?string $modified = null,
+		#[Schema(description: 'The ID of the Joomla user who last modified the ticket')]
+		?int $modified_by = null
 	)
 	{
 		$this->autologMCPTool();
 
 		$postData = [
-			'title'  => $title,
-			'status' => $status,
+			'title'       => $title,
+			'status'      => $status,
+			'created'     => $created,
+			'created_by'  => $created_by,
+			'modified'    => $modified,
+			'modified_by' => $modified_by,
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);

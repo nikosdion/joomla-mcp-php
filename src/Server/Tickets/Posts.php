@@ -114,7 +114,15 @@ class Posts
 		#[Schema(description: 'The ID of the ticket to reply to')]
 		int $ticketId,
 		#[Schema(description: 'The reply body as HTML')]
-		string $content_html
+		string $content_html,
+		#[Schema(description: 'When the post was originally created', format: 'date-time')]
+		?string $created = null,
+		#[Schema(description: 'The ID of the Joomla user who originally created the post')]
+		?int $created_by = null,
+		#[Schema(description: 'When the post was last modified', format: 'date-time')]
+		?string $modified = null,
+		#[Schema(description: 'The ID of the Joomla user who last modified the post')]
+		?int $modified_by = null
 	)
 	{
 		$this->autologMCPTool();
@@ -122,7 +130,13 @@ class Posts
 		$postData = [
 			'ticket_id'    => $ticketId,
 			'content_html' => $content_html,
+			'created'      => $created,
+			'created_by'   => $created_by,
+			'modified'     => $modified,
+			'modified_by'  => $modified_by,
 		];
+
+		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
@@ -143,12 +157,28 @@ class Posts
 		#[Schema(description: 'The ID of the post to update')]
 		int $id,
 		#[Schema(description: 'The new post body as HTML')]
-		string $content_html
+		string $content_html,
+		#[Schema(description: 'When the post was originally created', format: 'date-time')]
+		?string $created = null,
+		#[Schema(description: 'The ID of the Joomla user who originally created the post')]
+		?int $created_by = null,
+		#[Schema(description: 'When the post was last modified', format: 'date-time')]
+		?string $modified = null,
+		#[Schema(description: 'The ID of the Joomla user who last modified the post')]
+		?int $modified_by = null
 	)
 	{
 		$this->autologMCPTool();
 
-		$postData = ['content_html' => $content_html];
+		$postData = [
+			'content_html' => $content_html,
+			'created'      => $created,
+			'created_by'   => $created_by,
+			'modified'     => $modified,
+			'modified_by'  => $modified_by,
+		];
+
+		$postData = array_filter($postData, fn($v) => $v !== null);
 
 		/** @var HttpDecorator $http */
 		$http     = Factory::getContainer()->get('http');
