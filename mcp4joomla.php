@@ -442,6 +442,9 @@ try
 
 	$server = Server::make()
 		->withServerInfo('MCP4Joomla Server', MCP4JOOMLA_VERSION)
+		// Stdio is a single long-lived connection; the upstream 1-hour session TTL would
+		// otherwise GC the session during idle periods and force a client reconnect.
+		->withSession('array', ttl: 60 * 60 * 24 * 30)
 		->withInstructions(<<<'INSTRUCTIONS'
 MCP4Joomla provides tools for managing a Joomla CMS website via its Web Services API. Use these tools whenever the user asks about their Joomla site.
 
