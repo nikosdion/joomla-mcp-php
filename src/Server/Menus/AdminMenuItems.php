@@ -163,7 +163,9 @@ class AdminMenuItems
 		#[Schema(description: 'Browser navigation: 0=same window, 1=new window', enum: ['0', '1'])]
 		?string $browserNav = null,
 		#[Schema(description: 'Whether this menu item is the home page')]
-		?bool $home = null
+		?bool $home = null,
+		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', additionalProperties: true)]
+		?array $request = null
 	)
 	{
 		$this->autologMCPTool();
@@ -183,6 +185,7 @@ class AdminMenuItems
 			'tags'         => $tags,
 			'browserNav'   => $browserNav,
 			'home'         => $home,
+			'request'      => $request,
 		];
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
@@ -236,7 +239,9 @@ class AdminMenuItems
 		#[Schema(description: 'Browser navigation: 0=same window, 1=new window', enum: ['0', '1'])]
 		?string $browserNav = null,
 		#[Schema(description: 'Whether this menu item is the home page')]
-		?bool $home = null
+		?bool $home = null,
+		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', additionalProperties: true)]
+		?array $request = null
 	)
 	{
 		$this->autologMCPTool();
@@ -256,6 +261,7 @@ class AdminMenuItems
 			'tags'         => $tags,
 			'browserNav'   => $browserNav,
 			'home'         => $home,
+			'request'      => $request,
 		];
 
 		$writableFields = array_keys($postData);
