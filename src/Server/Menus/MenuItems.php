@@ -103,7 +103,7 @@ class MenuItems
 
 		$this->handlePossibleJoomlaAPIError($response);
 
-		return $this->getDataFromResponse($response, 'menuitems');
+		return $this->getDataFromResponse($response, 'items');
 	}
 
 	#[McpTool(
@@ -125,7 +125,7 @@ class MenuItems
 
 		$this->handlePossibleJoomlaAPIError($response);
 
-		return $this->getDataFromResponse($response, 'menuitems');
+		return $this->getDataFromResponse($response, 'items');
 	}
 
 	#[McpTool(
@@ -195,7 +195,7 @@ class MenuItems
 
 		$this->handlePossibleJoomlaAPIError($response);
 
-		return $this->getDataFromResponse($response, 'menuitems');
+		return $this->getDataFromResponse($response, 'items');
 	}
 
 	#[McpTool(
@@ -265,13 +265,13 @@ class MenuItems
 		$http = Factory::getContainer()->get('http');
 		$uri  = $http->getUri('v1/menus/site/items/' . $id);
 
-		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'menuitems', $postData, $writableFields);
+		$postData = $this->prepareReadMergeUpdatePayload($http, (string) $uri, 'items', $postData, $writableFields);
 
 		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
-		return $this->getDataFromResponse($response, 'menuitems');
+		return $this->getDataFromResponse($response, 'items');
 	}
 
 	#[McpTool(
