@@ -34,6 +34,18 @@ class Tickets
 	public function listTickets(
 		#[Schema(description: 'Search filter for tickets')]
 		?string $filterSearch = null,
+		#[Schema(description: 'Filter by category ID')]
+		?int $filterCategory = null,
+		#[Schema(description: 'Filter by ticket status', enum: [null, 'O', 'P', 'C'])]
+		?string $filterStatus = null,
+		#[Schema(description: 'Filter by the ID of the user who created the ticket')]
+		?int $filterUser = null,
+		#[Schema(description: 'Filter by priority ID')]
+		?int $filterPriority = null,
+		#[Schema(description: 'Field to order results by', enum: [null, 'id', 'title', 'status', 'priority', 'catid', 'created_by', 'created_on', 'modified_on'])]
+		?string $orderBy = null,
+		#[Schema(description: 'Sort direction', enum: [null, 'ASC', 'DESC'])]
+		?string $orderDirection = null,
 		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
 		?int $pageLimit = null,
 		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
@@ -51,6 +63,36 @@ class Tickets
 			$uri->setVar('filter[search]', $filterSearch);
 		}
 
+		if ($filterCategory !== null)
+		{
+			$uri->setVar('filter[catid]', $filterCategory);
+		}
+
+		if ($filterStatus !== null)
+		{
+			$uri->setVar('filter[status]', $filterStatus);
+		}
+
+		if ($filterUser !== null)
+		{
+			$uri->setVar('filter[created_by]', $filterUser);
+		}
+
+		if ($filterPriority !== null)
+		{
+			$uri->setVar('filter[priority]', $filterPriority);
+		}
+
+		if ($orderBy !== null)
+		{
+			$uri->setVar('list[ordering]', $orderBy);
+		}
+
+		if ($orderDirection !== null)
+		{
+			$uri->setVar('list[direction]', $orderDirection);
+		}
+
 		if ($pageLimit !== null)
 		{
 			$uri->setVar('page[limit]', $pageLimit);
@@ -66,6 +108,41 @@ class Tickets
 		$this->handlePossibleJoomlaAPIError($response);
 
 		return $this->getDataFromResponse($response, 'tickets');
+	}
+
+	#[McpTool(
+		name: 'tickets_tickets_open',
+		description: 'List open ATS (Akeeba Ticket System) support tickets, sorted by most recently modified first',
+		annotations: new ToolAnnotations(readOnlyHint: true)
+	)]
+	public function listOpenTickets(
+		#[Schema(description: 'Search filter for tickets')]
+		?string $filterSearch = null,
+		#[Schema(description: 'Filter by category ID')]
+		?int $filterCategory = null,
+		#[Schema(description: 'Filter by the ID of the user who created the ticket')]
+		?int $filterUser = null,
+		#[Schema(description: 'Filter by priority ID')]
+		?int $filterPriority = null,
+		#[Schema(description: 'Maximum number of items to return per page', minimum: 1)]
+		?int $pageLimit = null,
+		#[Schema(description: 'Starting record offset for pagination (0-based)', minimum: 0)]
+		?int $pageOffset = null
+	)
+	{
+		$this->autologMCPTool();
+
+		return $this->listTickets(
+			filterSearch: $filterSearch,
+			filterCategory: $filterCategory,
+			filterStatus: 'O',
+			filterUser: $filterUser,
+			filterPriority: $filterPriority,
+			orderBy: 'modified_on',
+			orderDirection: 'DESC',
+			pageLimit: $pageLimit,
+			pageOffset: $pageOffset,
+		);
 	}
 
 	#[McpTool(
