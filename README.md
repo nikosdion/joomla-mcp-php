@@ -102,6 +102,7 @@ The `server` command accepts the following optional arguments:
 | `--categories=LIST` / `-c LIST` | Comma-separated list of category names to include (case-insensitive). Only tools from these categories will be exposed. |
 | `--tools=LIST` / `-t LIST` | Comma-separated list of tool names to include. Only these exact tools will be exposed. |
 | `--non-destructive` / `-r` | Only expose read-only tools (no create, update, or delete). |
+| `--forbidden=SECRET` | Block any write-tool call whose parameters contain `SECRET`. Repeat the option for multiple secrets (e.g. `--forbidden=ghp_abc --forbidden=s3cr3t`). The Joomla API token is always protected automatically; use this option for additional secrets such as GitHub tokens, (S)FTP passwords, or any other value you never want written to your site. |
 
 **Precedence:** `--non-destructive` is applied last, after all other filters. `--tools` overrides `--categories`, which overrides `--no-panopticon` and `--no-ats`. If `--tools` is given, only those exact tools are exposed. If `--categories` is given, only tools from those categories are discovered. `--no-panopticon` excludes the Panopticon category and `--no-ats` excludes the Tickets category from discovery.
 
@@ -362,6 +363,54 @@ You can use this MCP server to run any command available in the core Joomla API 
 As far as security goes, this MCP server requires you to configure it with a Joomla API token for a Super User account, and your site's URL. This information should be kept secret at all times.
 
 A common threat model for MCP servers is that they are exposed to the internet, so that LLMs can be used to access them. This is not a problem for MCP4Joomla, as it is running on your local machine, and is not exposed to the internet. While this is limiting for some scenarios, it is not a problem for most LLMs, and it offers a great deal of security by virtue of the fact that the MCP server can not be exposed to the internet.
+
+### Prompt injection and secret exfiltration protection
+
+A subtler threat is **prompt injection**: malicious content on your Joomla site (e.g. a crafted article body or user-supplied field) tricks the LLM into passing a sensitive value — such as your API token or another credential — as a parameter to a write tool (create, update, delete). If successful, that secret would be written into your site's content and become publicly visible.
+
+MCP4Joomla guards against this automatically. Before any write-tool call is dispatched to the Joomla API, every input parameter is inspected for known secrets. If a secret is found anywhere in the inputs the call is rejected immediately and the LLM receives an error message instead.
+
+**What is protected by default:**
+
+* The `BEARER_TOKEN` (your Joomla API token) is always included in the blocklist, with no extra configuration required.
+
+**Adding further secrets via `--forbidden`:**
+
+Use the `--forbidden=SECRET` command-line option to add additional values that must never appear in write-tool parameters. Repeat the option for each secret:
+
+```bash
+php mcp4joomla.php server \
+  --forbidden=ghp_MyGitHubToken \
+  --forbidden=MyFTPPassword \
+  --forbidden=AnotherSecret
+```
+
+Or in your MCP configuration:
+
+```json
+{
+	"mcpServers": {
+		"MCP4Joomla": {
+			"command": "/usr/bin/php",
+			"args": [
+				"/path/to/joomla-mcp-php/mcp4joomla.php",
+				"server",
+				"--forbidden=ghp_MyGitHubToken",
+				"--forbidden=MyFTPPassword"
+			],
+			"env": {
+				"JOOMLA_BASE_URL": "https://www.example.com",
+				"BEARER_TOKEN": "your_joomla_api_token"
+			}
+		}
+	}
+}
+```
+
+Good candidates for `--forbidden` include any credential that the LLM could theoretically have seen in the conversation: GitHub personal access tokens, (S)FTP passwords, database passwords, other API keys, or SSH private keys.
+
+> [!NOTE]
+> The check is a substring match: if the secret appears *anywhere inside* a parameter value the call is blocked. Read-only tools (those exposed even with `--non-destructive`) are not subject to this check, since they cannot write data to your site.
 
 ## Kudos
 

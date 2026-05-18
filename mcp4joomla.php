@@ -344,6 +344,15 @@ try
 	/** @var \Dionysopoulos\Mcp4Joomla\Cli\CliInput $input */
 	$input = $container->get('input');
 
+	// Log the number of --forbidden secrets configured (never log their values).
+	$forbiddenSecrets = $input->forbidden ?? [];
+	$forbiddenCount   = count(is_array($forbiddenSecrets) ? $forbiddenSecrets : [$forbiddenSecrets]);
+
+	if ($forbiddenCount > 0)
+	{
+		$log->info("Secret leak prevention: {$forbiddenCount} additional forbidden secret(s) configured via --forbidden.");
+	}
+
 	// Determine scan directories based on --categories and --no-panopticon flags.
 	$scanDirs    = ['src/Server'];
 	$serverDir   = __DIR__ . '/src/Server';

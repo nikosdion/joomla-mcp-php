@@ -22,6 +22,8 @@ use ReflectionMethod;
  */
 trait AutoLoggingTrait
 {
+	use SecretLeakPreventionTrait;
+
 	/**
 	 * Returns an associative array of named arguments for the calling function or method.
 	 *
@@ -153,6 +155,14 @@ trait AutoLoggingTrait
 		$logger->info($message);
 
 		$arguments = $this->methodArgsWithNames();
+
+		// Reject non-read-only tool calls that embed a protected secret in their
+		// parameters — this blocks prompt injection exfiltration before the HTTP
+		// request is dispatched and before arguments are written to the log.
+		if ($mcpToolInstance->annotations?->readOnlyHint !== true)
+		{
+			$this->assertNoSecretLeak($arguments);
+		}
 
 		if (empty($arguments))
 		{

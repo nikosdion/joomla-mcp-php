@@ -30,6 +30,9 @@ class CliParser
 	/** @var array<string, string> Short alias → long param name */
 	private array $shortParams = [];
 
+	/** @var string[] Long param names that accumulate all occurrences into an array */
+	private array $multiParams = [];
+
 	public function __construct(private readonly string $name, private readonly string $description)
 	{
 	}
@@ -65,6 +68,27 @@ class CliParser
 		return $this;
 	}
 
+	/**
+	 * Registers a parameter that may appear multiple times on the command line.
+	 *
+	 * Each occurrence appends its value to the array stored under the option's
+	 * camelCase key in CliInput (e.g. --forbidden=a --forbidden=b → ['a', 'b']).
+	 * When the option is absent the key holds an empty array.
+	 */
+	public function addMultiParam(array $names, string $type, string $description): static
+	{
+		$long = $names[0];
+		$this->params[$long]  = $description;
+		$this->multiParams[]  = $long;
+
+		for ($i = 1; $i < count($names); $i++)
+		{
+			$this->shortParams[$names[$i]] = $long;
+		}
+
+		return $this;
+	}
+
 	public function addUsage(string $command, array $options): static
 	{
 		return $this;
@@ -84,7 +108,7 @@ class CliParser
 
 		foreach (array_keys($this->params) as $long)
 		{
-			$result[$this->toCamelCase($long)] = null;
+			$result[$this->toCamelCase($long)] = in_array($long, $this->multiParams, true) ? [] : null;
 		}
 
 		$count = count($args);
@@ -103,7 +127,16 @@ class CliParser
 
 					if (isset($this->params[$name]))
 					{
-						$result[$this->toCamelCase($name)] = $value;
+						$camel = $this->toCamelCase($name);
+
+						if (in_array($name, $this->multiParams, true))
+						{
+							$result[$camel][] = $value;
+						}
+						else
+						{
+							$result[$camel] = $value;
+						}
 					}
 				}
 				elseif (isset($this->flags[$longArg]))
@@ -112,7 +145,17 @@ class CliParser
 				}
 				elseif (isset($this->params[$longArg]) && $i + 1 < $count && !str_starts_with($args[$i + 1], '-'))
 				{
-					$result[$this->toCamelCase($longArg)] = $args[++$i];
+					$camel = $this->toCamelCase($longArg);
+					$value = $args[++$i];
+
+					if (in_array($longArg, $this->multiParams, true))
+					{
+						$result[$camel][] = $value;
+					}
+					else
+					{
+						$result[$camel] = $value;
+					}
 				}
 			}
 			elseif (str_starts_with($arg, '-') && strlen($arg) === 2)
@@ -125,7 +168,18 @@ class CliParser
 				}
 				elseif (isset($this->shortParams[$short]) && $i + 1 < $count && !str_starts_with($args[$i + 1], '-'))
 				{
-					$result[$this->toCamelCase($this->shortParams[$short])] = $args[++$i];
+					$long  = $this->shortParams[$short];
+					$camel = $this->toCamelCase($long);
+					$value = $args[++$i];
+
+					if (in_array($long, $this->multiParams, true))
+					{
+						$result[$camel][] = $value;
+					}
+					else
+					{
+						$result[$camel] = $value;
+					}
 				}
 			}
 		}

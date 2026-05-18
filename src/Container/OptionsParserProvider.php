@@ -32,10 +32,11 @@ class OptionsParserProvider implements ServiceProviderInterface
 				->addFlag(['no-schema'], 'Strip Schema descriptions/constraints from tool input schemas.')
 				->addParam(['categories', 'c'], 'STRING', 'Comma-separated category names to include.')
 				->addParam(['tools', 't'], 'STRING', 'Comma-separated tool names to include.')
-				->addFlag(['non-destructive', 'r'], 'Only expose read-only tools (no create, update, or delete).');
+				->addFlag(['non-destructive', 'r'], 'Only expose read-only tools (no create, update, or delete).')
+				->addMultiParam(['forbidden'], 'SECRET', 'Block any write-tool call whose parameters contain SECRET. Repeat for multiple secrets (e.g. --forbidden=ghp_abc --forbidden=s3cr3t).');
 
 			$optParser
-				->addUsage('server', ['debug', 'log', 'no-panopticon', 'no-ats', 'no-schema', 'categories', 'tools', 'non-destructive'])
+				->addUsage('server', ['debug', 'log', 'no-panopticon', 'no-ats', 'no-schema', 'categories', 'tools', 'non-destructive', 'forbidden'])
 				->addUsage('list-tools', []);
 
 			return $optParser;
