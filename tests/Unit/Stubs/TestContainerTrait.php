@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Dionysopoulos\Mcp4Joomla\Tests\Unit\Stubs;
 
+use Dionysopoulos\Mcp4Joomla\Cli\CliInput;
 use Dionysopoulos\Mcp4Joomla\Container\Factory;
 use Dionysopoulos\Mcp4Joomla\Utility\HttpDecorator;
 use Joomla\Http\Http;
@@ -33,8 +34,10 @@ trait TestContainerTrait
 	 * Sets up the Factory singleton with a test container.
 	 *
 	 * Call this from setUp() in your test class.
+	 *
+	 * @param   string[]  $forbidden  Values to expose via $input->forbidden (mirrors --forbidden CLI option).
 	 */
-	protected function setUpTestContainer(): void
+	protected function setUpTestContainer(array $forbidden = []): void
 	{
 		$this->mockHttp  = $this->createMock(Http::class);
 		$this->spyLogger = new SpyLogger();
@@ -46,7 +49,8 @@ trait TestContainerTrait
 			'BEARER_TOKEN'    => 'dGVzdHRva2VuMTIz',
 		];
 
-		$pimple['log'] = $this->spyLogger;
+		$pimple['log']   = $this->spyLogger;
+		$pimple['input'] = new CliInput(['forbidden' => $forbidden]);
 
 		$container = new Psr11Container($pimple);
 

@@ -11,6 +11,7 @@ namespace Dionysopoulos\Mcp4Joomla\Tests\Unit\Stubs;
 
 use Dionysopoulos\Mcp4Joomla\Utility\AutoLoggingTrait;
 use Dionysopoulos\Mcp4Joomla\Utility\VarToLogTrait;
+use PhpMcp\Schema\ToolAnnotations;
 use PhpMcp\Server\Attributes\McpTool;
 
 class AutoLoggingStub
@@ -37,6 +38,26 @@ class AutoLoggingStub
 	}
 
 	public function methodWithoutAttribute(): void
+	{
+		$this->autologMCPTool();
+	}
+
+	#[McpTool(
+		name: 'test_tool_readonly',
+		description: 'A read-only test tool',
+		annotations: new ToolAnnotations(readOnlyHint: true)
+	)]
+	public function toolReadOnly(string $secret = ''): void
+	{
+		$this->autologMCPTool();
+	}
+
+	#[McpTool(
+		name: 'test_tool_write',
+		description: 'A write test tool',
+		annotations: new ToolAnnotations(destructiveHint: true)
+	)]
+	public function toolWrite(string $content = ''): void
 	{
 		$this->autologMCPTool();
 	}

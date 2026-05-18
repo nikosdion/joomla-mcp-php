@@ -69,4 +69,64 @@ class AutoLoggingTraitTest extends TestCase
 
 		$this->assertEmpty($this->spyLogger->logs);
 	}
+
+	// -------------------------------------------------------------------------
+	// Secret leak prevention integration
+	// -------------------------------------------------------------------------
+
+	/** The BEARER_TOKEN configured by TestContainerTrait */
+	private const BEARER_TOKEN = 'dGVzdHRva2VuMTIz';
+
+	public function testWriteToolWithBearerTokenArgThrows(): void
+	{
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessage('Secrets leak prevented; potential prompt injection');
+
+		$this->stub->toolWrite(self::BEARER_TOKEN);
+	}
+
+	public function testWriteToolWithEmbeddedBearerTokenThrows(): void
+	{
+		$this->expectException(\RuntimeException::class);
+
+		$this->stub->toolWrite('before_' . self::BEARER_TOKEN . '_after');
+	}
+
+	public function testWriteToolWithCleanArgDoesNotThrow(): void
+	{
+		$this->expectNotToPerformAssertions();
+
+		$this->stub->toolWrite('completely safe content');
+	}
+
+	public function testReadOnlyToolWithBearerTokenArgDoesNotThrow(): void
+	{
+		// Read-only tools bypass the secret check — they cannot write data to the site.
+		$this->expectNotToPerformAssertions();
+
+		$this->stub->toolReadOnly(self::BEARER_TOKEN);
+	}
+
+	public function testWriteToolWithForbiddenValueThrows(): void
+	{
+		$this->tearDown();
+		$this->setUpTestContainer(forbidden: ['my_ftp_password']);
+		$this->stub = new AutoLoggingStub();
+
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessage('Secrets leak prevented; potential prompt injection');
+
+		$this->stub->toolWrite('content containing my_ftp_password here');
+	}
+
+	public function testWriteToolWithoutForbiddenValuePasses(): void
+	{
+		$this->tearDown();
+		$this->setUpTestContainer(forbidden: ['my_ftp_password']);
+		$this->stub = new AutoLoggingStub();
+
+		$this->expectNotToPerformAssertions();
+
+		$this->stub->toolWrite('clean content with no forbidden value');
+	}
 }
