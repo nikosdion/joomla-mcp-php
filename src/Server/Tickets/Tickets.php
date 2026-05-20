@@ -246,10 +246,24 @@ class Tickets
 		#[Schema(description: 'When the ticket was last modified', format: 'date-time')]
 		?string $modified = null,
 		#[Schema(description: 'The ID of the Joomla user who last modified the ticket')]
-		?int $modified_by = null
+		?int $modified_by = null,
+		#[Schema(description: 'Joomla custom field values as a key-value map (field name => value). Existing field values are preserved automatically; only specify fields you want to change.')]
+		?array $com_fields = null
 	)
 	{
 		$this->autologMCPTool();
+
+		/** @var HttpDecorator $http */
+		$http = Factory::getContainer()->get('http');
+		$uri  = $http->getUri('v1/ats/tickets/' . $id);
+
+		$currentResponse = $http->get($uri->toString());
+
+		$this->handlePossibleJoomlaAPIError($currentResponse);
+
+		$currentData    = $this->getDataFromResponse($currentResponse, 'tickets');
+		$existingFields = $this->extractComFieldsAsKeyValue($currentData->data->attributes->com_fields ?? null);
+		$mergedFields   = empty($com_fields) ? $existingFields : array_replace($existingFields, $com_fields);
 
 		$postData = [
 			'title'       => $title,
@@ -262,14 +276,43 @@ class Tickets
 
 		$postData = array_filter($postData, fn($v) => $v !== null);
 
-		/** @var HttpDecorator $http */
-		$http     = Factory::getContainer()->get('http');
-		$uri      = $http->getUri('v1/ats/tickets/' . $id);
+		if (!empty($mergedFields))
+		{
+			$postData['com_fields'] = $mergedFields;
+		}
+
 		$response = $http->patch($uri->toString(), json_encode($postData), ['Content-Type' => 'application/json']);
 
 		$this->handlePossibleJoomlaAPIError($response);
 
 		return $this->getDataFromResponse($response, 'tickets');
+	}
+
+	/**
+	 * Converts the com_fields array from a GET response into a fieldname => value map suitable for PATCH payloads.
+	 */
+	private function extractComFieldsAsKeyValue(mixed $comFields): array
+	{
+		if (!is_array($comFields) || empty($comFields))
+		{
+			return [];
+		}
+
+		$result = [];
+
+		foreach ($comFields as $field)
+		{
+			$field = is_object($field) ? $field : (object) $field;
+
+			if (!isset($field->name))
+			{
+				continue;
+			}
+
+			$result[$field->name] = $field->rawvalue ?? $field->value ?? null;
+		}
+
+		return array_filter($result, fn($v) => $v !== null);
 	}
 
 	#[McpTool(

@@ -160,9 +160,19 @@ class TicketsTest extends TestCase
 
 	public function testUpdateTicket(): void
 	{
-		$body = json_encode([
+		$readBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['title' => 'Old Title', 'status' => 'O']],
+		]);
+
+		$updateBody = json_encode([
 			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['title' => 'Updated', 'status' => 'C']],
 		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->with($this->callback(fn($url) => str_contains((string) $url, 'v1/ats/tickets/42')))
+			->willReturn(createJoomlaResponse(200, $readBody));
 
 		$this->mockHttp
 			->expects($this->once())
@@ -175,7 +185,7 @@ class TicketsTest extends TestCase
 				}),
 				$this->anything()
 			)
-			->willReturn(createJoomlaResponse(200, $body));
+			->willReturn(createJoomlaResponse(200, $updateBody));
 
 		$result = $this->tickets->updateTicket(42, title: 'Updated', status: 'C');
 
@@ -184,9 +194,18 @@ class TicketsTest extends TestCase
 
 	public function testUpdateTicketExcludesNullFields(): void
 	{
-		$body = json_encode([
+		$readBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['title' => 'Existing Title', 'status' => 'O']],
+		]);
+
+		$updateBody = json_encode([
 			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['status' => 'P']],
 		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
 
 		$this->mockHttp
 			->expects($this->once())
@@ -199,9 +218,135 @@ class TicketsTest extends TestCase
 				}),
 				$this->anything()
 			)
-			->willReturn(createJoomlaResponse(200, $body));
+			->willReturn(createJoomlaResponse(200, $updateBody));
 
 		$result = $this->tickets->updateTicket(42, status: 'P');
+
+		$this->assertIsObject($result);
+	}
+
+	public function testUpdateTicketPreservesExistingComFields(): void
+	{
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'tickets',
+				'id'         => '42',
+				'attributes' => [
+					'title'      => 'Old Title',
+					'status'     => 'O',
+					'com_fields' => [
+						['id' => 1, 'name' => 'order_id', 'value' => '1234', 'rawvalue' => '1234'],
+						['id' => 2, 'name' => 'product', 'value' => 'Akeeba Backup', 'rawvalue' => 'Akeeba Backup'],
+					],
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['status' => 'C']],
+		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->with(
+				$this->anything(),
+				$this->callback(function ($payload) {
+					$data = json_decode($payload, true);
+					return $data['status'] === 'C'
+						&& isset($data['com_fields'])
+						&& $data['com_fields']['order_id'] === '1234'
+						&& $data['com_fields']['product'] === 'Akeeba Backup';
+				}),
+				$this->anything()
+			)
+			->willReturn(createJoomlaResponse(200, $updateBody));
+
+		$result = $this->tickets->updateTicket(42, status: 'C');
+
+		$this->assertIsObject($result);
+	}
+
+	public function testUpdateTicketMergesProvidedComFields(): void
+	{
+		$readBody = json_encode([
+			'data' => [
+				'type'       => 'tickets',
+				'id'         => '42',
+				'attributes' => [
+					'title'      => 'Old Title',
+					'status'     => 'O',
+					'com_fields' => [
+						['id' => 1, 'name' => 'order_id', 'value' => '1234', 'rawvalue' => '1234'],
+						['id' => 2, 'name' => 'product', 'value' => 'Akeeba Backup', 'rawvalue' => 'Akeeba Backup'],
+					],
+				],
+			],
+		]);
+
+		$updateBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['status' => 'C']],
+		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->with(
+				$this->anything(),
+				$this->callback(function ($payload) {
+					$data = json_decode($payload, true);
+					return $data['status'] === 'C'
+						&& $data['com_fields']['order_id'] === '9999'
+						&& $data['com_fields']['product'] === 'Akeeba Backup';
+				}),
+				$this->anything()
+			)
+			->willReturn(createJoomlaResponse(200, $updateBody));
+
+		$result = $this->tickets->updateTicket(42, status: 'C', com_fields: ['order_id' => '9999']);
+
+		$this->assertIsObject($result);
+	}
+
+	public function testUpdateTicketWithNoExistingComFields(): void
+	{
+		$readBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['title' => 'Old Title', 'status' => 'O']],
+		]);
+
+		$updateBody = json_encode([
+			'data' => ['type' => 'tickets', 'id' => '42', 'attributes' => ['status' => 'C']],
+		]);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $readBody));
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('patch')
+			->with(
+				$this->anything(),
+				$this->callback(function ($payload) {
+					$data = json_decode($payload, true);
+					return $data['status'] === 'C' && !array_key_exists('com_fields', $data);
+				}),
+				$this->anything()
+			)
+			->willReturn(createJoomlaResponse(200, $updateBody));
+
+		$result = $this->tickets->updateTicket(42, status: 'C');
 
 		$this->assertIsObject($result);
 	}
