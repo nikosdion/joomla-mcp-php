@@ -31,6 +31,16 @@ class Attachments
 	use VarToLogTrait;
 	use AutoLoggingTrait;
 
+	/**
+	 * Maximum size, in bytes, of content this class will inline into an MCP tool result.
+	 *
+	 * Attachments (or files extracted from a ZIP attachment) larger than this are rejected with a
+	 * RuntimeException pointing the caller at saveAttachmentToFile() instead. Inlining anything much
+	 * bigger risks exceeding the MCP client's stdio message size limit, which silently kills the
+	 * connection rather than surfacing a usable error.
+	 */
+	private const MAX_INLINE_BYTES = 200 * 1024;
+
 	#[McpTool(
 		name: 'tickets_attachments_list',
 		description: 'List all ATS (Akeeba Ticket System) ticket attachments. Requires ATS Pro.',
@@ -135,10 +145,75 @@ class Attachments
 
 		if ($mimeType === 'application/zip')
 		{
-			return $this->extractZip($body);
+			return $this->extractZip($body, $id);
+		}
+
+		if (strlen($body) > self::MAX_INLINE_BYTES)
+		{
+			throw new \RuntimeException(sprintf(
+				'Attachment %d is %s bytes, too large to return inline (limit: %s bytes). '
+				. 'Use the tickets_attachments_save_to_file tool to save it to disk instead, '
+				. 'then inspect it with command-line tools.',
+				$id,
+				number_format(strlen($body)),
+				number_format(self::MAX_INLINE_BYTES)
+			));
 		}
 
 		return $this->buildContent($body, $mimeType);
+	}
+
+	#[McpTool(
+		name: 'tickets_attachments_save_to_file',
+		description: 'Download an ATS (Akeeba Ticket System) attachment and save its raw content to a file path on disk, instead of inlining it into the conversation. Use this for attachments that are too large to return inline (e.g. ZIP archives containing large log files) — save it, then inspect it locally with command-line tools (unzip, grep, rg, sed, head, tail). Requires ATS Pro.',
+		annotations: new ToolAnnotations(readOnlyHint: true)
+	)]
+	public function saveAttachmentToFile(
+		#[Schema(description: 'The ID of the attachment to download')]
+		int $id,
+		#[Schema(description: 'Absolute filesystem path to save the attachment to. Its parent directory must already exist.')]
+		string $path
+	): array
+	{
+		$this->autologMCPTool();
+
+		/** @var HttpDecorator $http */
+		$http     = Factory::getContainer()->get('http');
+		$uri      = $http->getUri('v1/ats/attachments/' . $id . '/download');
+		$response = $http->get($uri->toString());
+
+		$this->handlePossibleJoomlaAPIError($response);
+
+		$directory = dirname($path);
+
+		if (!is_dir($directory))
+		{
+			throw new \RuntimeException("The directory '{$directory}' does not exist. Create it first.");
+		}
+
+		$body = (string) $response->getBody();
+
+		if (file_put_contents($path, $body) === false)
+		{
+			throw new \RuntimeException("Failed to write the attachment content to '{$path}'.");
+		}
+
+		$contentType = $response->getHeaderLine('Content-Type');
+		$mimeType    = strtolower(trim(explode(';', $contentType)[0]));
+		$disposition = $response->getHeaderLine('Content-Disposition');
+		$filename    = null;
+
+		if (preg_match('/filename="?([^";]+)"?/i', $disposition, $matches))
+		{
+			$filename = $matches[1];
+		}
+
+		return [
+			'path'     => $path,
+			'bytes'    => strlen($body),
+			'mimeType' => $mimeType,
+			'filename' => $filename,
+		];
 	}
 
 	#[McpTool(
@@ -191,9 +266,15 @@ class Attachments
 	/**
 	 * Extracts a ZIP archive from binary content and returns each file as a Content item.
 	 *
+	 * Entries whose uncompressed size exceeds self::MAX_INLINE_BYTES are not extracted; a placeholder
+	 * TextContent pointing at saveAttachmentToFile() is returned for them instead. A ZIP's compressed
+	 * size (checked before download) can be misleadingly small compared to what it expands to — e.g. a
+	 * 615 KB ZIP can hold a 17 MB log file — so this per-entry check on the uncompressed size is the
+	 * only reliable guard.
+	 *
 	 * @return array<ImageContent|TextContent>
 	 */
-	private function extractZip(string $zipContent): array
+	private function extractZip(string $zipContent, int $attachmentId): array
 	{
 		$tmpFile = tempnam(sys_get_temp_dir(), 'ats_zip_');
 
@@ -217,6 +298,26 @@ class Attachments
 				// Skip directory entries
 				if (str_ends_with($name, '/'))
 				{
+					continue;
+				}
+
+				$stat              = $zip->statIndex($i);
+				$uncompressedSize  = $stat['size'] ?? 0;
+
+				if ($uncompressedSize > self::MAX_INLINE_BYTES)
+				{
+					$contents[] = TextContent::make(sprintf(
+						"=== %s ===\nThis file is %s bytes when extracted, too large to return inline "
+						. "(limit: %s bytes). Use the tickets_attachments_save_to_file tool with id=%d "
+						. "to save the ZIP attachment to disk, then extract and inspect '%s' locally "
+						. "with command-line tools (unzip, grep, rg, sed, head, tail).",
+						$name,
+						number_format($uncompressedSize),
+						number_format(self::MAX_INLINE_BYTES),
+						$attachmentId,
+						$name
+					));
+
 					continue;
 				}
 

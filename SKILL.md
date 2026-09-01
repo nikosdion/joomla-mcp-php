@@ -253,8 +253,22 @@ const image = await use_mcp_tool({
   tool_name: "tickets_attachments_download",
   arguments: { id: 7 }
   // Returns ImageContent for images, TextContent for text/code,
-  // or an array of Content objects when the attachment is a ZIP
+  // or an array of Content objects when the attachment is a ZIP.
+  // Files (or ZIP entries) larger than ~200 KiB are NOT inlined; a
+  // RuntimeException / placeholder text tells you to use
+  // tickets_attachments_save_to_file instead.
 });
+
+// A ZIP attachment can be small itself while expanding to a huge log
+// file (e.g. a 600 KB ZIP holding a 17 MB debug log). Save it to disk
+// and use normal CLI tools to inspect only the parts you need.
+const saved = await use_mcp_tool({
+  server_name: "mcp4joomla",
+  tool_name: "tickets_attachments_save_to_file",
+  arguments: { id: 7, path: "/tmp/attachment-7.zip" }
+  // Returns { path, bytes, mimeType, filename }
+});
+// Then, e.g.: unzip -p /tmp/attachment-7.zip "*.txt" | tail -n 200
 ```
 
 ### Manage User Access

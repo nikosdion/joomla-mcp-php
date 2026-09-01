@@ -203,6 +203,97 @@ class AttachmentsTest extends TestCase
 		$this->assertStringContainsString("define('DEBUG'", $textItem->text);
 	}
 
+	public function testDownloadAttachmentTooLargeThrows(): void
+	{
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, str_repeat('x', 201 * 1024), ['Content-Type' => 'text/plain']));
+
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessageMatches('/too large to return inline/');
+
+		$this->attachments->downloadAttachment(12);
+	}
+
+	public function testDownloadAttachmentZipWithOversizedEntrySkipsIt(): void
+	{
+		$zip     = new \ZipArchive();
+		$tmpFile = tempnam(sys_get_temp_dir(), 'test_zip3_');
+		$zip->open($tmpFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+		$zip->addFromString('small.txt', 'This one is small enough to inline.');
+		$zip->addFromString('huge.txt', str_repeat('x', 201 * 1024));
+		$zip->close();
+
+		$zipContent = file_get_contents($tmpFile);
+		unlink($tmpFile);
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, $zipContent, ['Content-Type' => 'application/zip']));
+
+		$result = $this->attachments->downloadAttachment(13);
+
+		$this->assertIsArray($result);
+		$this->assertCount(2, $result);
+
+		$texts = array_map(fn($item) => $item->text, $result);
+
+		$this->assertTrue((bool) array_filter($texts, fn($t) => str_contains($t, 'small enough to inline')));
+		$this->assertTrue((bool) array_filter($texts, fn($t) => str_contains($t, 'too large to return inline')
+			&& str_contains($t, 'tickets_attachments_save_to_file')
+			&& str_contains($t, 'id=13')));
+	}
+
+	public function testSaveAttachmentToFile(): void
+	{
+		$content = "2025-01-01 12:00:00 [INFO] Application started\n";
+
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->with($this->callback(fn($url) => str_contains((string) $url, 'v1/ats/attachments/14/download')))
+			->willReturn(createJoomlaResponse(200, $content, [
+				'Content-Type'        => 'text/plain',
+				'Content-Disposition' => 'attachment; filename="debug.log"',
+			]));
+
+		$targetPath = sys_get_temp_dir() . '/mcp4joomla_test_' . uniqid() . '.log';
+
+		try
+		{
+			$result = $this->attachments->saveAttachmentToFile(14, $targetPath);
+
+			$this->assertSame($targetPath, $result['path']);
+			$this->assertSame(strlen($content), $result['bytes']);
+			$this->assertSame('text/plain', $result['mimeType']);
+			$this->assertSame('debug.log', $result['filename']);
+			$this->assertFileExists($targetPath);
+			$this->assertSame($content, file_get_contents($targetPath));
+		}
+		finally
+		{
+			if (file_exists($targetPath))
+			{
+				unlink($targetPath);
+			}
+		}
+	}
+
+	public function testSaveAttachmentToFileThrowsForMissingDirectory(): void
+	{
+		$this->mockHttp
+			->expects($this->once())
+			->method('get')
+			->willReturn(createJoomlaResponse(200, 'content', ['Content-Type' => 'text/plain']));
+
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessageMatches('/does not exist/');
+
+		$this->attachments->saveAttachmentToFile(15, '/no/such/directory/here/file.log');
+	}
+
 	public function testDeleteAttachment(): void
 	{
 		$this->mockHttp
