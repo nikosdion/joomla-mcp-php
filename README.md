@@ -8,6 +8,8 @@ An [MCP (Model Context Protocol)](https://en.wikipedia.org/wiki/Model_Context_Pr
 
 This MCP server is an implementation of the MCP protocol for Joomla 5 and later. It sits between your LLM and your Joomla installation, allowing the LLM to interact with your Joomla installation. The ultimate goal is to make Joomla a first-class citizen in LLMs, allowing you to build and manage your Joomla sites using LLMs without having to write any code or take any manual steps.
 
+The MCP server covers the core Joomla web services, but also some Akeeba extensions. This repository is not affiliated with or endorsed by Akeeba Ltd.
+
 ## Requirements
 
 * PHP 8.1 or later; PHP 8.4 recommended.
