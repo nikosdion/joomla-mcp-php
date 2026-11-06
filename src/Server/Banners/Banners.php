@@ -128,10 +128,10 @@ class Banners
 	public function createBanner(
 		#[Schema(description: 'Banner name', minLength: 1, maxLength: 255)]
 		string $name,
-		#[Schema(description: 'URL slug for the banner', pattern: '^[a-z0-9-_]+$')]
-		?string $alias = null,
 		#[Schema(description: 'Banner category ID', minimum: 0, exclusiveMinimum: true)]
 		int $catId,
+		#[Schema(description: 'URL slug for the banner', pattern: '^[a-z0-9-_]+$')]
+		?string $alias = null,
 		#[Schema(
 			description: 'Publish state: 0=unpublished, 1=published, 2=archived, -2=trashed',
 			enum: [0, 1, 2, -2]

@@ -135,14 +135,14 @@ class MenuItems
 	public function createMenuItem(
 		#[Schema(description: 'Menu item title', minLength: 1, maxLength: 255)]
 		string $title,
-		#[Schema(description: 'URL slug for the menu item', pattern: '^[a-z0-9-_]+$')]
-		?string $alias = null,
 		#[Schema(description: 'Menu type identifier this item belongs to', minLength: 1)]
 		string $menutype,
 		#[Schema(description: 'Menu item type, e.g. "component"')]
 		string $type,
 		#[Schema(description: 'The link URL for the menu item')]
 		string $link,
+		#[Schema(description: 'URL slug for the menu item', pattern: '^[a-z0-9-_]+$')]
+		?string $alias = null,
 		#[Schema(description: 'Parent menu item ID, 1 for root')]
 		?int $parentId = 1,
 		#[Schema(
