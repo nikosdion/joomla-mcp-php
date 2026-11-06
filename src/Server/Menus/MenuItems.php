@@ -164,7 +164,7 @@ class MenuItems
 		?string $browserNav = null,
 		#[Schema(description: 'Whether this menu item is the home page')]
 		?bool $home = null,
-		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', additionalProperties: true)]
+		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', type: 'object', additionalProperties: true)]
 		?array $request = null
 	)
 	{
@@ -240,7 +240,7 @@ class MenuItems
 		?string $browserNav = null,
 		#[Schema(description: 'Whether this menu item is the home page')]
 		?bool $home = null,
-		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', additionalProperties: true)]
+		#[Schema(description: 'Request parameters for component menu items, e.g. {"id": 5} to target a Single Article or Single Category. Corresponds to the request[] fields Joomla requires when type=component.', type: 'object', additionalProperties: true)]
 		?array $request = null
 	)
 	{
